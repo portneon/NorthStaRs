@@ -1,0 +1,27 @@
+{
+  "name": "northstars",
+  "version": "1.0.0",
+  "description": "A Gamified learning platform",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/portneon/NorthStaRs.git"
+  },
+  "author": "shashwat,soham,vaibhav",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/portneon/NorthStaRs/issues"
+  },
+  "homepage": "https://github.com/portneon/NorthStaRs#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "gitignore": "^0.7.0",
+    "morgan": "^1.10.1",
+    "nodemon": "^3.1.10"
+  }
+}
