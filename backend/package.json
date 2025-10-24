@@ -17,11 +17,18 @@
   },
   "homepage": "https://github.com/portneon/NorthStaRs#readme",
   "dependencies": {
+    "@prisma/client": "^6.18.0",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "gitignore": "^0.7.0",
     "morgan": "^1.10.1",
     "nodemon": "^3.1.10"
-  }
+    
+  },
+  "prisma": {
+  "seed": "node prisma/seed.js"
+}
+
 }
