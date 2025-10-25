@@ -25,7 +25,6 @@ model User {
   badges         UserBadge[]
   attempts       Attempt[]
   leaderboard    Leaderboard?
-  createdQuizzes Quiz[]       @relation("UserCreatedQuizzes")
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -59,8 +58,6 @@ model Quiz {
   topicId       String?
   course        Course?    @relation(fields: [courseId], references: [id])
   courseId      String?
-  createdBy     User?      @relation("UserCreatedQuizzes", fields: [createdById], references: [id])
-  createdById   String?
   questions     Question[]
   attempts      Attempt[]
   createdAt     DateTime   @default(now())

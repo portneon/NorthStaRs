@@ -8,8 +8,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("Start seeding ...");
 
-  // --- 1. CLEANUP ---
-  // Delete data in reverse order of dependency
+  
   console.log("Cleaning database...");
   await prisma.userAnswer.deleteMany();
   await prisma.attempt.deleteMany();
