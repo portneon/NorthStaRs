@@ -1,8 +1,7 @@
-// prisma/seed.js
 
 const { PrismaClient } = require("@prisma/client");
+const bcrypt = require('bcryptjs');
 
-// Initialize Prisma Client
 const prisma = new PrismaClient();
 
 async function main() {
@@ -26,12 +25,13 @@ async function main() {
 
   // --- 2. CREATE USERS ---
   console.log("Seeding users...");
+  const hashedPassword = await bcrypt.hash("password123", 10);
+
   const user1 = await prisma.user.create({
     data: {
       username: "alice",
       email: "alice@example.com",
-      // !! In a real app, you must HASH this password
-      password: "password123",
+      password: hashedPassword,
     },
   });
 
@@ -39,7 +39,7 @@ async function main() {
     data: {
       username: "bob",
       email: "bob@example.com",
-      password: "password123",
+      password: hashedPassword,
     },
   });
   console.log(`Created users: ${user1.username}, ${user2.username}`);
@@ -54,7 +54,35 @@ async function main() {
       xpReward: 50,
     },
   });
-  console.log(`Created badge: ${badge1.name}`);
+  
+  const badge2 = await prisma.badge.create({
+    data: {
+      name: "Quiz Master",
+      description: "Completed 10 quizzes - you're a quiz master!",
+      iconUrl: "badge_master.png",
+      xpReward: 200,
+    },
+  });
+  
+  const badge3 = await prisma.badge.create({
+    data: {
+      name: "Speed Demon",
+      description: "Completed a quiz in under 2 minutes",
+      iconUrl: "badge_speed.png",
+      xpReward: 100,
+    },
+  });
+  
+  const badge4 = await prisma.badge.create({
+    data: {
+      name: "Perfect Score",
+      description: "Got 100% on a quiz",
+      iconUrl: "badge_perfect.png",
+      xpReward: 150,
+    },
+  });
+  
+  console.log(`Created badges: ${badge1.name}, ${badge2.name}, ${badge3.name}, ${badge4.name}`);
 
   // --- 4. CREATE COURSE, TOPICS, QUIZZES, QUESTIONS, OPTIONS ---
   console.log("Seeding course, topic, quiz, questions, and options...");
@@ -71,7 +99,6 @@ async function main() {
               title: "JS Variables Quiz",
               description: "Test your knowledge of JS variables.",
               difficulty: "Easy",
-              createdById: user1.id, // Alice created this quiz
               questions: {
                 create: [
                   // Question 1
@@ -100,6 +127,34 @@ async function main() {
                         { text: "string" },
                         { text: "integer" },
                         { text: "boolean" },
+                      ],
+                    },
+                  },
+                  // Question 3
+                  {
+                    text: "Which method adds an element to the end of an array?",
+                    explanation: "push() adds elements to the end of an array.",
+                    correctOptionId: "",
+                    options: {
+                      create: [
+                        { text: "push()" }, // Correct
+                        { text: "pop()" },
+                        { text: "shift()" },
+                        { text: "unshift()" },
+                      ],
+                    },
+                  },
+                  // Question 4
+                  {
+                    text: "What does === check for?",
+                    explanation: "=== checks for both value and type equality.",
+                    correctOptionId: "",
+                    options: {
+                      create: [
+                        { text: "Value equality only" },
+                        { text: "Type equality only" },
+                        { text: "Both value and type equality" }, // Correct
+                        { text: "Reference equality" },
                       ],
                     },
                   },
@@ -156,6 +211,28 @@ async function main() {
     await prisma.question.update({
       where: { id: q2.id },
       data: { correctOptionId: q2CorrectOption.id },
+    });
+  }
+
+  // Q3: "push()"
+  const q3 = quiz.questions[2];
+  const q3CorrectOption = q3.options.find((o) => o.text === "push()");
+
+  if (q3CorrectOption) {
+    await prisma.question.update({
+      where: { id: q3.id },
+      data: { correctOptionId: q3CorrectOption.id },
+    });
+  }
+
+  // Q4: "Both value and type equality"
+  const q4 = quiz.questions[3];
+  const q4CorrectOption = q4.options.find((o) => o.text === "Both value and type equality");
+
+  if (q4CorrectOption) {
+    await prisma.question.update({
+      where: { id: q4.id },
+      data: { correctOptionId: q4CorrectOption.id },
     });
   }
   console.log("Correct option IDs updated.");
