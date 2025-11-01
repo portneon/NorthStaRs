@@ -50,7 +50,7 @@ exports.getQuizById = async (req, res) => {
 exports.submitQuizAttempt = async (req, res) => {
   try {
     const { quizId, answers, timeTaken } = req.body;
-    const userId = req.user.id; // assuming auth middleware sets this
+    const userId = req.user.id;
     
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },

@@ -1,352 +1,153 @@
-
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require('bcryptjs');
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Start seeding ...");
+  console.log("🌱 Starting database seeding...");
 
-  
-  console.log("Cleaning database...");
-  await prisma.userAnswer.deleteMany();
-  await prisma.attempt.deleteMany();
-  await prisma.option.deleteMany();
-  await prisma.question.deleteMany();
-  await prisma.userBadge.deleteMany();
-  await prisma.leaderboard.deleteMany();
-  await prisma.reward.deleteMany();
+  // 🧹 Clean up existing data
+  await prisma.quizAttempt.deleteMany();
   await prisma.quiz.deleteMany();
-  await prisma.topic.deleteMany();
   await prisma.course.deleteMany();
   await prisma.badge.deleteMany();
+  await prisma.leaderboard.deleteMany();
   await prisma.user.deleteMany();
-  console.log("Database cleaned.");
 
-  // --- 2. CREATE USERS ---
-  console.log("Seeding users...");
+  console.log("🧹 Existing data cleared.");
+
+  // 🧍‍♂️ Create Users
+  console.log("👥 Creating users...");
   const hashedPassword = await bcrypt.hash("password123", 10);
+  const users = [];
 
-  const user1 = await prisma.user.create({
-    data: {
-      username: "alice",
-      email: "alice@example.com",
-      password: hashedPassword,
-    },
-  });
+  for (let i = 1; i <= 15; i++) {
+    const user = await prisma.user.create({
+      data: {
+        username: `user${i}`,
+        email: `user${i}@example.com`,
+        password: hashedPassword,
+        xp: Math.floor(Math.random() * 1000), // random XP up to 1000
+        level: Math.ceil(Math.random() * 10), // random level 1–10
+        streakCount: Math.floor(Math.random() * 30), // random streak up to 30
+        lastLogin: new Date(),
+      },
+    });
+    users.push(user);
+  }
+  console.log(`✅ Created ${users.length} users.`);
 
-  const user2 = await prisma.user.create({
-    data: {
-      username: "bob",
-      email: "bob@example.com",
-      password: hashedPassword,
-    },
+  // 🏅 Create Badges
+  console.log("🏅 Creating badges...");
+  const badges = await prisma.badge.createMany({
+    data: [
+      { name: "Newbie", description: "Awarded for joining the platform" },
+      { name: "Achiever", description: "Awarded for completing your first quiz" },
+      { name: "Champion", description: "Awarded for reaching 500 XP" },
+      { name: "Master", description: "Awarded for reaching 1000 XP" },
+    ],
   });
-  console.log(`Created users: ${user1.username}, ${user2.username}`);
+  console.log("✅ Badges created.");
 
-  // --- 3. CREATE BADGES ---
-  console.log("Seeding badges...");
-  const badge1 = await prisma.badge.create({
+  // 📘 Create Course
+  console.log("📘 Creating course...");
+  const course = await prisma.course.create({
     data: {
-      name: "Quiz Newbie",
-      description: "You completed your first quiz!",
-      iconUrl: "badge_newbie.png",
-      xpReward: 50,
+      title: "JavaScript Essentials",
+      description: "Learn the basics of JavaScript programming",
+      level: "Beginner",
+      duration: "4 weeks",
     },
   });
-  
-  const badge2 = await prisma.badge.create({
-    data: {
-      name: "Quiz Master",
-      description: "Completed 10 quizzes - you're a quiz master!",
-      iconUrl: "badge_master.png",
-      xpReward: 200,
-    },
-  });
-  
-  const badge3 = await prisma.badge.create({
-    data: {
-      name: "Speed Demon",
-      description: "Completed a quiz in under 2 minutes",
-      iconUrl: "badge_speed.png",
-      xpReward: 100,
-    },
-  });
-  
-  const badge4 = await prisma.badge.create({
-    data: {
-      name: "Perfect Score",
-      description: "Got 100% on a quiz",
-      iconUrl: "badge_perfect.png",
-      xpReward: 150,
-    },
-  });
-  
-  console.log(`Created badges: ${badge1.name}, ${badge2.name}, ${badge3.name}, ${badge4.name}`);
+  console.log(`✅ Course created: ${course.title}`);
 
-  // --- 4. CREATE COURSE, TOPICS, QUIZZES, QUESTIONS, OPTIONS ---
-  console.log("Seeding course, topic, quiz, questions, and options...");
-  const course1 = await prisma.course.create({
+  // 🧩 Create Quiz
+  console.log("🧩 Creating quiz...");
+  const quiz = await prisma.quiz.create({
     data: {
-      title: "JavaScript Fundamentals",
-      description: "Learn the basics of JavaScript programming.",
-      topics: {
-        create: {
-          name: "Variables and Data Types",
-          description: "Understanding var, let, const, and data types.",
-          quizzes: {
-            create: {
-              title: "JS Variables Quiz",
-              description: "Test your knowledge of JS variables.",
-              difficulty: "Easy",
-              questions: {
-                create: [
-                  // Question 1
-                  {
-                    text: "Which keyword declares a block-scoped variable?",
-                    explanation:
-                      "'let' and 'const' are block-scoped. 'var' is function-scoped.",
-                    correctOptionId: "", // Placeholder, will update later
-                    options: {
-                      create: [
-                        { text: "var" },
-                        { text: "let" },
-                        { text: "const" },
-                        { text: "let and const" }, // Correct
-                      ],
-                    },
-                  },
-                  // Question 2
-                  {
-                    text: "What is the data type of `typeof 42`?",
-                    explanation: "All numbers in JS are of type 'number'.",
-                    correctOptionId: "", // Placeholder, will update later
-                    options: {
-                      create: [
-                        { text: "number" }, // Correct
-                        { text: "string" },
-                        { text: "integer" },
-                        { text: "boolean" },
-                      ],
-                    },
-                  },
-                  // Question 3
-                  {
-                    text: "Which method adds an element to the end of an array?",
-                    explanation: "push() adds elements to the end of an array.",
-                    correctOptionId: "",
-                    options: {
-                      create: [
-                        { text: "push()" }, // Correct
-                        { text: "pop()" },
-                        { text: "shift()" },
-                        { text: "unshift()" },
-                      ],
-                    },
-                  },
-                  // Question 4
-                  {
-                    text: "What does === check for?",
-                    explanation: "=== checks for both value and type equality.",
-                    correctOptionId: "",
-                    options: {
-                      create: [
-                        { text: "Value equality only" },
-                        { text: "Type equality only" },
-                        { text: "Both value and type equality" }, // Correct
-                        { text: "Reference equality" },
-                      ],
-                    },
-                  },
-                ],
-              },
-            },
+      title: "JavaScript Basics Quiz",
+      courseId: course.id,
+      questions: {
+        create: [
+          {
+            questionText: "What is the output of 2 + '2' in JavaScript?",
+            options: ["22", "4", "NaN", "Error"],
+            correctAnswer: "22",
           },
-        },
-      },
-    },
-    // We include all the nested data to use it in the next steps
-    include: {
-      topics: {
-        include: {
-          quizzes: {
-            include: {
-              questions: {
-                include: {
-                  options: true,
-                },
-              },
-            },
+          {
+            questionText: "Which keyword is used to declare a constant in JS?",
+            options: ["var", "let", "const", "define"],
+            correctAnswer: "const",
           },
-        },
+          {
+            questionText: "What is the result of typeof null?",
+            options: ["null", "undefined", "object", "number"],
+            correctAnswer: "object",
+          },
+          {
+            questionText: "Which method converts JSON to an object?",
+            options: [
+              "JSON.parse()",
+              "JSON.stringify()",
+              "JSON.convert()",
+              "JSON.toObject()",
+            ],
+            correctAnswer: "JSON.parse()",
+          },
+          {
+            questionText: "What does NaN stand for?",
+            options: [
+              "Not a Number",
+              "Negative and Null",
+              "New Assigned Number",
+              "None Above Null",
+            ],
+            correctAnswer: "Not a Number",
+          },
+        ],
       },
     },
   });
-  console.log(`Created course: ${course1.title}`);
+  console.log(`✅ Quiz created: ${quiz.title}`);
 
-  // --- 5. UPDATE correctOptionId (The tricky part) ---
-  // We must do this after creation because we don't know the
-  // generated Option IDs during the nested create.
-  console.log("Updating correctOptionIds for questions...");
-  const quiz = course1.topics[0].quizzes[0];
-
-  // Q1: "let and const"
-  const q1 = quiz.questions[0];
-  const q1CorrectOption = q1.options.find(
-    (o) => o.text === "let and const"
-  );
-
-  if (q1CorrectOption) {
-    await prisma.question.update({
-      where: { id: q1.id },
-      data: { correctOptionId: q1CorrectOption.id },
-    });
-  }
-
-  // Q2: "number"
-  const q2 = quiz.questions[1];
-  const q2CorrectOption = q2.options.find((o) => o.text === "number");
-
-  if (q2CorrectOption) {
-    await prisma.question.update({
-      where: { id: q2.id },
-      data: { correctOptionId: q2CorrectOption.id },
-    });
-  }
-
-  // Q3: "push()"
-  const q3 = quiz.questions[2];
-  const q3CorrectOption = q3.options.find((o) => o.text === "push()");
-
-  if (q3CorrectOption) {
-    await prisma.question.update({
-      where: { id: q3.id },
-      data: { correctOptionId: q3CorrectOption.id },
-    });
-  }
-
-  // Q4: "Both value and type equality"
-  const q4 = quiz.questions[3];
-  const q4CorrectOption = q4.options.find((o) => o.text === "Both value and type equality");
-
-  if (q4CorrectOption) {
-    await prisma.question.update({
-      where: { id: q4.id },
-      data: { correctOptionId: q4CorrectOption.id },
-    });
-  }
-  console.log("Correct option IDs updated.");
-
-  // --- 6. SIMULATE A QUIZ ATTEMPT (by Bob) ---
-  console.log("Simulating quiz attempt for Bob...");
-
-  // Refetch quiz data to ensure we have the updated correctOptionIds
-  const quizToAttempt = await prisma.quiz.findUnique({
-    where: { id: quiz.id },
-    include: { questions: true },
-  });
-
-  if (!quizToAttempt) {
-    throw new Error("Quiz not found for attempt!");
-  }
-
-  // Bob's Answers
-  const bobAnswerQ1 = q1CorrectOption; // Bob gets Q1 right
-  const bobAnswerQ2 = q2.options.find((o) => o.text === "string"); // Bob gets Q2 wrong
-
-  let score = 0;
-  const userAnswersData = [];
-
-  // Prep Q1 Answer
-  if (bobAnswerQ1) {
-    const isCorrect = bobAnswerQ1.id === q1.correctOptionId;
-    if (isCorrect) score++;
-    userAnswersData.push({
-      questionId: q1.id,
-      optionId: bobAnswerQ1.id,
-      isCorrect: isCorrect,
-    });
-  }
-
-  // Prep Q2 Answer
-  if (bobAnswerQ2) {
-    const isCorrect = bobAnswerQ2.id === q2.correctOptionId;
-    if (isCorrect) score++;
-    userAnswersData.push({
-      questionId: q2.id,
-      optionId: bobAnswerQ2.id,
-      isCorrect: isCorrect,
-    });
-  }
-
-  // Create the Attempt with nested UserAnswers
-  await prisma.attempt.create({
-    data: {
-      userId: user2.id,
-      quizId: quiz.id,
-      finishedAt: new Date(),
-      score: score,
-      timeTakenSec: 180, // 3 minutes
-      userAnswers: {
-        createMany: {
-          data: userAnswersData,
-        },
+  // 🧮 Create Random Quiz Attempts for all 15 users
+  console.log("🧠 Creating quiz attempts...");
+  for (const user of users) {
+    const correctAnswers = Math.floor(Math.random() * 6); // 0–5
+    const score = correctAnswers * 20;
+    await prisma.quizAttempt.create({
+      data: {
+        userId: user.id,
+        quizId: quiz.id,
+        score,
+        completedAt: new Date(),
       },
-    },
-  });
-  console.log(`Created attempt for Bob. Score: ${score}`);
+    });
+  }
+  console.log("✅ Quiz attempts created for all users.");
 
-  // --- 7. UPDATE USER STATS & LEADERBOARD ---
-  console.log("Updating user stats and leaderboard...");
-  const xpFromQuiz = score * 10; // 10 XP per correct answer
-  const xpFromBadge = badge1.xpReward;
+  // 🏆 Create Leaderboard
+  console.log("🏆 Creating leaderboard...");
+  const sortedUsers = [...users].sort((a, b) => b.xp - a.xp);
+  for (let i = 0; i < sortedUsers.length; i++) {
+    await prisma.leaderboard.create({
+      data: {
+        userId: sortedUsers[i].id,
+        totalXP: sortedUsers[i].xp,
+        rank: i + 1,
+      },
+    });
+  }
+  console.log("✅ Leaderboard created.");
 
-  // Give Bob the "Quiz Newbie" badge
-  await prisma.userBadge.create({
-    data: {
-      userId: user2.id,
-      badgeId: badge1.id,
-    },
-  });
-
-  // Update Bob's XP and Level
-  const totalXpBob = xpFromQuiz + xpFromBadge;
-  await prisma.user.update({
-    where: { id: user2.id },
-    data: {
-      xp: totalXpBob,
-      level: 2, // Just an example logic
-      lastLogin: new Date(),
-    },
-  });
-
-  // Create Leaderboard entries
-  await prisma.leaderboard.create({
-    data: {
-      userId: user1.id,
-      totalXP: 0,
-      rank: 2,
-    },
-  });
-  await prisma.leaderboard.create({
-    data: {
-      userId: user2.id,
-      totalXP: totalXpBob,
-      rank: 1,
-    },
-  });
-  console.log("Leaderboard updated.");
-
-  console.log("Seeding finished.");
+  console.log("🎉 Database seeding completed successfully!");
 }
 
-// Execute the main function
 main()
   .catch((e) => {
-    console.error(e);
+    console.error("❌ Seeding error:", e);
     process.exit(1);
   })
   .finally(async () => {
-    // Close Prisma Client connection
     await prisma.$disconnect();
   });
