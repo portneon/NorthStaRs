@@ -1,0 +1,38 @@
+
+.top-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4rem; 
+    background-color: #030712; 
+  }
+  
+
+  .newclass {
+    position: relative;
+    width: 70vw;
+    height: 25vw;
+    background-color: #111827;
+    box-shadow: 0 0 30px rgba(255, 183, 77, 0.4);
+    border-top-right-radius: 50vw;
+    border-bottom-left-radius: 80vw;
+    overflow: hidden;
+    display: flex;
+
+  }
+  .hello-card {
+    background-color:  #111827;
+    height: 25vw;
+    width: 22vw;
+    padding: 10px;
+    
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(255, 183, 77, 0.4);
+  }
+  
+  .hello-card h1 {
+    color: #dee822;
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+  

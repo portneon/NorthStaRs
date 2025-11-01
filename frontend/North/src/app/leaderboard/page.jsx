@@ -1,14 +1,39 @@
+'use client';
+import { useEffect, useState } from "react";
 import { getLeaderboard } from "../utils/api";
+import Top from "./components/Top";
+import Ranking from "./components/Ranking";
 
-export default async function Leaderboard() {
-  const leaderboard = await getLeaderboard(); // calls the function
+
+
+export default function Leaderboard() {
+   // calls the function
+
+  const [leaderboard, setleaderboard] = useState([])
+  useEffect(() => {
+    async function fetchLeaderboard() {
+      try {
+        const response = await getLeaderboard();
+        await setleaderboard(response);
+      } catch (error) {
+        console.error("Error fetching leaderboard:", error);
+      }
+    }
+
+    fetchLeaderboard(); 
+  }, []);
+
+const data1= leaderboard.slice(0,3)
+
 
   return (
-    <div>
+    <div className="bg-gray-950 w-full min-h-screen">
       <h1>Leaderboard</h1>
-      {leaderboard.map((ele) => (
-        <p key={ele.id}>{ele.userId}</p>
-      ))}
+      <Top  data1 = {data1}/>
+      <Ranking data = {leaderboard.slice(3)}/>
+
+   
+
     </div>
   );
 }

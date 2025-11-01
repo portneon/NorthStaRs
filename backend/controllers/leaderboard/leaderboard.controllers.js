@@ -4,9 +4,19 @@ const prisma = require('../../prisma/prisma')
 async function getleaderboard(req, res) {
     
     try {
-        const data = await prisma.leaderboard.findMany()        
-        // console.log(data)
-        data.sort((a, b) => b.totalXP -  a.totalXP)
+        const data = await prisma.user.findMany({
+            select: {
+              id: true,
+              username: true,
+              xp: true,
+              level: true,
+                streakCount: true,
+            lastLogin: true,
+            },
+            orderBy: {
+              xp: 'desc' 
+            }
+          });
         
         return res.status(200).json(data)
         
