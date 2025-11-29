@@ -1,0 +1,241 @@
+/* NOIR Design System - Code Editor Styles */
+
+@keyframes glitch {
+  0% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+    filter: hue-rotate(90deg);
+  }
+  40% {
+    transform: translate(2px, -2px);
+    filter: hue-rotate(180deg) invert(1);
+  }
+  60% {
+    transform: translate(-2px, -2px);
+    filter: hue-rotate(270deg);
+  }
+  80% {
+    transform: translate(2px, 2px);
+    filter: hue-rotate(360deg);
+  }
+  100% {
+    transform: translate(0);
+    filter: hue-rotate(0deg);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.noir-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  border: 1px solid #333333;
+}
+
+.noir-grid-item {
+  border: 1px solid #333333;
+}
+
+/* Signal Color Button */
+.noir-button {
+  background-color: #CCFF00;
+  color: #080808;
+  border: none;
+  padding: 12px 24px;
+  font-family: 'Space Mono', 'Geist Mono', monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: none;
+  border-radius: 0;
+}
+
+.noir-button:hover {
+  transform: translateZ(8px);
+  box-shadow: 0 8px 0 #080808;
+}
+
+.noir-button:active {
+  transform: translateZ(0);
+  box-shadow: none;
+}
+
+.noir-button:disabled {
+  background-color: #333333;
+  color: #666666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Secondary Button */
+.noir-button-secondary {
+  background-color: transparent;
+  color: #F2F2F2;
+  border: 1px solid #333333;
+  padding: 12px 24px;
+  font-family: 'Space Mono', 'Geist Mono', monospace;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: none;
+  border-radius: 0;
+}
+
+.noir-button-secondary:hover {
+  border-color: #CCFF00;
+  color: #CCFF00;
+}
+
+/* Deep Lift Effect */
+.noir-lift {
+  transition: none;
+}
+
+.noir-lift:hover {
+  transform: translateZ(16px);
+  z-index: 10;
+}
+
+/* Grid Borders */
+.noir-border {
+  border: 1px solid #333333;
+}
+
+.noir-border-signal {
+  border: 1px solid #CCFF00;
+}
+
+/* Loading State */
+.noir-loading {
+  position: relative;
+  overflow: hidden;
+}
+
+.noir-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(204, 255, 0, 0.1),
+    transparent
+  );
+  animation: scan 1.5s linear infinite;
+}
+
+@keyframes scan {
+  to {
+    left: 100%;
+  }
+}
+
+/* Status Indicators */
+.status-online {
+  color: #CCFF00;
+}
+
+.status-error {
+  color: #FF3333;
+}
+
+.status-pending {
+  color: #888888;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Code Editor Wrapper */
+.code-editor-wrapper {
+  border: 1px solid #333333;
+}
+
+.code-editor-wrapper:focus-within {
+  border-color: #CCFF00;
+}
+
+/* Output Panel Glitch */
+.output-glitch {
+  animation: glitch 0.3s ease-in-out;
+}
+
+/* Badges - Geometric Style */
+.noir-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid #333333;
+  color: #F2F2F2;
+}
+
+.noir-badge-easy {
+  border-color: #4CAF50;
+  color: #4CAF50;
+}
+
+.noir-badge-medium {
+  border-color: #FFC107;
+  color: #FFC107;
+}
+
+.noir-badge-hard {
+  border-color: #F44336;
+  color: #F44336;
+}
+
+/* Asymmetric Grid Layouts */
+.grid-asymmetric-1 {
+  grid-column: span 4;
+  grid-row: span 4;
+}
+
+.grid-asymmetric-2 {
+  grid-column: span 2;
+  grid-row: span 6;
+}
+
+.grid-asymmetric-3 {
+  grid-column: span 6;
+  grid-row: span 3;
+}
+
+/* Typography */
+.noir-heading {
+  font-family: 'Inter', 'Helvetica', sans-serif;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  line-height: 0.9;
+  color: #F2F2F2;
+}
+
+.noir-mono {
+  font-family: 'Space Mono', 'Geist Mono', monospace;
+  color: #F2F2F2;
+}
+
+/* Empty Space (Luxury) */
+.noir-empty {
+  background: transparent;
+  border: 1px solid #333333;
+}

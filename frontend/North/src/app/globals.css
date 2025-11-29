@@ -1,2 +1,8 @@
 @import "tailwindcss";
 
+:root {
+    --noir-void-black: #080808;
+    --noir-plaster-white: #F2F2F2;
+    --noir-signal-color: #CCFF00;
+    --noir-fog-grey: #333333;
+}

@@ -21,6 +21,8 @@ model User {
   achievements   UserAchievement[] 
   progress       UserProgress[]
   leaderboard    Leaderboard?
+  codeSubmissions CodeSubmission[]
+  attempts       Attempt[]
   
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
@@ -143,4 +145,56 @@ model Leaderboard {
   totalXP     Int      @default(0)
   rank        Int?
   lastUpdated DateTime @default(now())
+}
+
+model CodeProblem {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  difficulty  String
+  language    String
+  starterCode String   @db.Text
+  xpReward    Int      @default(100)
+  
+  testCases   TestCase[]
+  submissions CodeSubmission[]
+  
+  createdAt   DateTime @default(now())
+  
+  @@map("code_problems")
+}
+
+model TestCase {
+  id        String      @id @default(uuid())
+  problemId String
+  problem   CodeProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  
+  input     String      @db.Text
+  expected  String      @db.Text
+  isHidden  Boolean     @default(false)
+  
+  @@map("test_cases")
+}
+
+model CodeSubmission {
+  id         String      @id @default(uuid())
+  userId     String
+  user       User        @relation(fields: [userId], references: [id])
+  problemId  String
+  problem    CodeProblem @relation(fields: [problemId], references: [id])
+  
+  code       String      @db.Text
+  language   String
+  status     String
+  output     String?     @db.Text
+  error      String?     @db.Text
+  
+  testsPassed Int       @default(0)
+  testsTotal  Int       @default(0)
+  
+  executionTime Int?
+  
+  createdAt  DateTime  @default(now())
+  
+  @@map("code_submissions")
 }

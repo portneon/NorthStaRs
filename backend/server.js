@@ -42,7 +42,15 @@ app.get('/', (req, res) => {
         getAll: 'GET /badge',
         getUserBadges: 'GET /badge/user/:userId'
       },
-      leaderboard: 'GET /leaderboard'
+      leaderboard: 'GET /leaderboard',
+      code: {
+        execute: 'POST /code/execute',
+        submit: 'POST /code/submit/:problemId',
+        getProblems: 'GET /code/problems',
+        getProblem: 'GET /code/problems/:id',
+        getSubmissions: 'GET /code/submissions/:userId',
+        getLanguages: 'GET /code/languages'
+      }
     },
     example: {
       login: {
@@ -64,12 +72,14 @@ const authentication = require('./routes/user/user.auth.routes')
 const quizRoutes = require('./routes/quiz/quiz.routes')
 const badgeRoutes = require('./routes/badge/badge.routes')
 const userProfileRoutes = require('./routes/user/user.profile.routes')
+const codeRoutes = require('./routes/code/code.routes')
 
-app.use('/leaderboard',getleaderboard)
-app.use('/user',authentication)
+app.use('/leaderboard', getleaderboard)
+app.use('/user', authentication)
 app.use('/quiz', quizRoutes)
 app.use('/badge', badgeRoutes)
 app.use('/profile', userProfileRoutes)
+app.use('/code', codeRoutes)
 app.listen('3005', () => {
-    console.log('server is live on 3005')
+  console.log('server is live on 3005')
 })
