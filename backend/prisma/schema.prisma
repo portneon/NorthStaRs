@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,159 +8,139 @@ datasource db {
 }
 
 model User {
-  id             String         @id @default(uuid())
-  username       String         @unique
-  operativeName  String?        // Optional display name for leaderboard
-  email          String         @unique
+  id             String    @id @default(uuid())
+  username       String    @unique
+  operativeName  String?  
+  email          String    @unique
   password       String
-  xp             Int            @default(0)
-  level          Int            @default(1)
-  streakCount    Int            @default(0)
-  lastLogin      DateTime?
-  badges         UserBadge[]
-  achievements   UserAchievement[]
-  attempts       Attempt[]
+  xp             Int       @default(0)
+  level          Int       @default(1)
+  clearanceLevel String    @default("Level_01")
+  streakCount    Int       @default(0)
+  lastActivity   DateTime? 
+  achievements   UserAchievement[] 
+  progress       UserProgress[]
   leaderboard    Leaderboard?
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
+  
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
   @@map("users")
 }
 
+
 model Achievement {
-  id          String             @id @default(uuid())
-  name        String
+  id          String   @id @default(uuid())
+  name        String  
+  code        String   @unique
   description String
-  icon        String             // Icon name or URL
-  xpReward    Int                @default(100)
+  type        String  
+  xpReward    Int      @default(50)
+  
   users       UserAchievement[]
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
 
   @@map("achievements")
 }
 
 model UserAchievement {
-  id             String      @id @default(uuid())
-  userId         String
-  achievementId  String
-  unlockedAt     DateTime    @default(now())
-  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievement    Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  id            String      @id @default(uuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime    @default(now())
+  
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, achievementId])
+  @@unique([userId, achievementId]) 
   @@map("user_achievements")
-
-  Reward Reward[]
 }
 
 model Course {
-  id          String   @id @default(uuid())
-  title       String
-  description String?
-  topics      Topic[]
-  quizzes     Quiz[]
-  createdAt   DateTime @default(now())
+  id           String   @id @default(uuid())
+  title        String   
+  description  String?
+  topics       Topic[]
+  
+
+  userProgress UserProgress[] 
+  
+  createdAt    DateTime @default(now())
 }
 
 model Topic {
-  id          String  @id @default(uuid())
-  name        String
+  id          String   @id @default(uuid())
+  name        String  
   description String?
-  course      Course? @relation(fields: [courseId], references: [id], onDelete: Cascade)
   courseId    String?
+  course      Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade)
   quizzes     Quiz[]
 }
 
 model Quiz {
-  id            String     @id @default(uuid())
-  title         String
-  description   String?
-  difficulty    String
-  topic         Topic?     @relation(fields: [topicId], references: [id])
-  topicId       String?
-  course        Course?    @relation(fields: [courseId], references: [id])
-  courseId      String?
-  questions     Question[]
-  attempts      Attempt[]
-  createdAt     DateTime   @default(now())
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  difficulty  String  
+ 
+  isDaily     Boolean  @default(false) 
+  dailyDate   DateTime? 
+  topicId     String?
+  topic       Topic?   @relation(fields: [topicId], references: [id])
+  
+  questions   Question[]
+  attempts    Attempt[]
+  
+  createdAt   DateTime @default(now())
 }
 
 model Question {
-  id              String       @id @default(uuid())
+  id              String   @id @default(uuid())
   text            String
-  quiz            Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
   quizId          String
+  quiz            Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options         Option[]
-  correctOptionId String
+  correctOptionId String?   
   explanation     String?
-  userAnswers     UserAnswer[]
 }
 
 model Option {
-  id          String       @id @default(uuid())
-  text        String
-  question    Question     @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  questionId  String
-  userAnswers UserAnswer[]
+  id         String   @id @default(uuid())
+  text       String
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 }
 
 model Attempt {
-  id           String       @id @default(uuid())
-  user         User         @relation(fields: [userId], references: [id])
+  id           String   @id @default(uuid())
   userId       String
-  quiz         Quiz         @relation(fields: [quizId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
   quizId       String
-  startedAt    DateTime     @default(now())
+  quiz         Quiz     @relation(fields: [quizId], references: [id])
+  
+  score        Int      @default(0)
+  isCompleted  Boolean  @default(false)
+  timeTakenSec Int?     
   finishedAt   DateTime?
-  score        Int          @default(0)
-  timeTakenSec Int?
-  userAnswers  UserAnswer[]
 }
 
-model UserAnswer {
-  id             String   @id @default(uuid())
-  attempt        Attempt  @relation(fields: [attemptId], references: [id])
-  attemptId      String
-  question       Question @relation(fields: [questionId], references: [id])
-  questionId     String
-  selectedOption Option   @relation(fields: [optionId], references: [id])
-  optionId       String
-  isCorrect      Boolean
-}
+model UserProgress {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  courseId   String
+  course     Course   @relation(fields: [courseId], references: [id])
+  
+  percentage Int      @default(0) 
+  lastAccess DateTime @default(now())
 
-model Badge {
-  id          String      @id @default(uuid())
-  name        String
-  description String
-  iconUrl     String?
-  xpReward    Int         @default(50)
-  users       UserBadge[]
-}
-
-model UserBadge {
-  id       String   @id @default(uuid())
-  user     User     @relation(fields: [userId], references: [id])
-  userId   String
-  badge    Badge    @relation(fields: [badgeId], references: [id])
-  badgeId  String
-  earnedAt DateTime @default(now())
+  @@unique([userId, courseId])
 }
 
 model Leaderboard {
   id          String   @id @default(uuid())
-  user        User     @relation(fields: [userId], references: [id])
   userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
   totalXP     Int      @default(0)
   rank        Int?
   lastUpdated DateTime @default(now())
-}
-
-model Reward {
-  id        String   @id @default(uuid())
-  type      String
-  amount    Int      @default(0)
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  createdAt DateTime @default(now())
 }
