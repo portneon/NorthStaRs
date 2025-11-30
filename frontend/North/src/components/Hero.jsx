@@ -2,21 +2,28 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
-function Hero() {
+function Hero({ streak = 14, xpGoal = 87, username = 'Architect', level = 1 }) {
     const router = useRouter();
 
     return (
         <div className="grid grid-cols-12 border-b border-zinc-800">
             {/* Intro Page / Main Text Area */}
             <div className="col-span-12 lg:col-span-8 p-6 md:p-12 lg:p-16 border-b lg:border-b-0 lg:border-r border-zinc-800 bg-zinc-950 flex flex-col justify-center min-h-[40vh] md:min-h-[50vh]">
-                <span className="font-mono text-lime-400 text-[10px] md:text-xs tracking-widest mb-4">/// NEXUS_GRID_SYSTEM</span>
+                <div className="flex items-center gap-3 mb-4">
+                    <span className="font-mono text-lime-400 text-[10px] md:text-xs tracking-widest">/// NEXUS_GRID_SYSTEM</span>
+                    <span className="font-mono text-zinc-500 text-[10px] md:text-xs tracking-widest">|</span>
+                    <span className="font-mono text-zinc-500 text-[10px] md:text-xs tracking-widest">LVL_{String(level).padStart(2, '0')}</span>
+                </div>
 
                 <h1 className="font-sans font-bold text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-white leading-[0.9] tracking-tighter uppercase mb-8 break-words hyphens-auto">
-                    Architecture<br className="hidden md:block" /> of Mind
+                    Welcome back,<br className="hidden md:block" /> {username}
                 </h1>
 
                 <div className="flex flex-col sm:flex-row gap-4">
-                    <button className="bg-lime-400 text-black px-6 py-3 md:px-8 md:py-4 font-mono text-xs md:text-sm font-bold uppercase hover:bg-white transition-colors w-full sm:w-auto text-center">
+                    <button
+                        onClick={() => router.push('/arena')}
+                        className="bg-lime-400 text-black px-6 py-3 md:px-8 md:py-4 font-mono text-xs md:text-sm font-bold uppercase hover:bg-white transition-colors w-full sm:w-auto text-center"
+                    >
                         Resume_Protocol
                     </button>
                     <button
@@ -35,17 +42,17 @@ function Hero() {
                 <div className="relative z-10 mt-2">
                     <span className="font-mono text-zinc-500 text-xs block mb-2">CURRENT_STREAK</span>
                     <div className="text-6xl md:text-7xl font-mono text-white font-bold tracking-tighter">
-                        14<span className="text-lime-400 text-2xl ml-1">DAYS</span>
+                        {streak}<span className="text-lime-400 text-2xl ml-1">DAYS</span>
                     </div>
                 </div>
 
                 <div className="relative z-10 space-y-2 mb-2">
                     <div className="flex justify-between font-mono text-xs text-zinc-400">
                         <span>XP_GOAL</span>
-                        <span>87%</span>
+                        <span>{xpGoal}%</span>
                     </div>
                     <div className="w-full bg-zinc-800 h-1">
-                        <div className="bg-lime-400 h-1 w-[87%] shadow-[0_0_10px_rgba(132,204,22,0.5)]"></div>
+                        <div className="bg-lime-400 h-1 shadow-[0_0_10px_rgba(132,204,22,0.5)]" style={{ width: `${xpGoal}%` }}></div>
                     </div>
                 </div>
             </div>
@@ -53,3 +60,5 @@ function Hero() {
     )
 };
 export default Hero;
+
+

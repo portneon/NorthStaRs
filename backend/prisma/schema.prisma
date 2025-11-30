@@ -18,8 +18,10 @@ model User {
   clearanceLevel String    @default("Level_01")
   streakCount    Int       @default(0)
   lastActivity   DateTime? 
+  lastLogin      DateTime?
   achievements   UserAchievement[] 
   progress       UserProgress[]
+  problemProgress ProblemProgress[]
   leaderboard    Leaderboard?
   codeSubmissions CodeSubmission[]
   attempts       Attempt[]
@@ -62,11 +64,28 @@ model Course {
   title        String   
   description  String?
   topics       Topic[]
-  
+  modules      Module[]
 
   userProgress UserProgress[] 
   
   createdAt    DateTime @default(now())
+}
+
+model Module {
+  id            String   @id @default(uuid())
+  title         String
+  subTitle      String   // e.g., "Module_04"
+  description   String?  @db.Text
+  difficulty    String   @default("intermediate")
+  courseId      String?
+  course        Course?  @relation(fields: [courseId], references: [id], onDelete: Cascade, map: "modules_course_fkey_custom")
+  
+  problems      CodeProblem[]
+  progress      ProblemProgress[]
+  
+  createdAt     DateTime @default(now())
+  
+  @@map("modules")
 }
 
 model Topic {
@@ -138,6 +157,26 @@ model UserProgress {
   @@unique([userId, courseId])
 }
 
+model ProblemProgress {
+  id           String      @id @default(uuid())
+  userId       String
+  problemId    String
+  moduleId     String?
+  completed    Boolean     @default(false)
+  completedAt  DateTime?
+  attempts     Int         @default(0)
+  
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  problem      CodeProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  module       Module?     @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  
+  @@unique([userId, problemId])
+  @@map("problem_progress")
+}
+
 model Leaderboard {
   id          String   @id @default(uuid())
   userId      String   @unique
@@ -156,8 +195,15 @@ model CodeProblem {
   starterCode String   @db.Text
   xpReward    Int      @default(100)
   
+  problemType String?  @default("standard")
+  constraints String?  @db.Text
+  
+  moduleId    String?
+  module      Module?  @relation(fields: [moduleId], references: [id], onDelete: SetNull)
+  
   testCases   TestCase[]
   submissions CodeSubmission[]
+  progress    ProblemProgress[]
   
   createdAt   DateTime @default(now())
   
@@ -165,13 +211,15 @@ model CodeProblem {
 }
 
 model TestCase {
-  id        String      @id @default(uuid())
-  problemId String
-  problem   CodeProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+  id             String      @id @default(uuid())
+  problemId      String
+  problem        CodeProblem @relation(fields: [problemId], references: [id], onDelete: Cascade)
   
-  input     String      @db.Text
-  expected  String      @db.Text
-  isHidden  Boolean     @default(false)
+  input          String      @db.Text
+  expected       String?     @db.Text
+  expectedOutput String?     @db.Text
+  isHidden       Boolean     @default(false)
+  description    String?
   
   @@map("test_cases")
 }

@@ -1,0 +1,595 @@
+[
+    {
+        "id": "grid_path_001",
+        "title": "Robot's First Steps",
+        "difficulty": "beginner",
+        "description": "A toy robot is placed at position (0, 0) on a 5x5 grid. Write code using loops to move the robot in a square pattern: right 3 steps, down 3 steps, left 3 steps, and up 3 steps back to start.",
+        "instructions": "Your code should generate an array of positions [i, j] representing each step the robot takes. The robot starts at [0, 0]. Use loops to generate the path.\n\nExample output format:\n[[0,0], [0,1], [0,2], [0,3], [1,3], [2,3], [3,3], ...]\n\nNote: i represents row (vertical), j represents column (horizontal)",
+        "gridSize": {
+            "rows": 5,
+            "cols": 5
+        },
+        "startPosition": [
+            0,
+            0
+        ],
+        "expectedPath": [
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                1
+            ],
+            [
+                0,
+                2
+            ],
+            [
+                0,
+                3
+            ],
+            [
+                1,
+                3
+            ],
+            [
+                2,
+                3
+            ],
+            [
+                3,
+                3
+            ],
+            [
+                3,
+                2
+            ],
+            [
+                3,
+                1
+            ],
+            [
+                3,
+                0
+            ],
+            [
+                2,
+                0
+            ],
+            [
+                1,
+                0
+            ],
+            [
+                0,
+                0
+            ]
+        ],
+        "hints": [
+            "Use a for loop for each direction of movement",
+            "Remember to include the starting position",
+            "Track your current position as you move"
+        ],
+        "starterCode": {
+            "javascript": "// Define the path array\nlet path = [[0, 0]];\nlet currentRow = 0;\nlet currentCol = 0;\n\n// Write your loops here to generate the path\n// Move right 3 steps\n\n// Move down 3 steps\n\n// Move left 3 steps\n\n// Move up 3 steps\n\nconsole.log(JSON.stringify(path));",
+            "python": "# Define the path array\npath = [[0, 0]]\ncurrent_row = 0\ncurrent_col = 0\n\n# Write your loops here to generate the path\n# Move right 3 steps\n\n# Move down 3 steps\n\n# Move left 3 steps\n\n# Move up 3 steps\n\nimport json\nprint(json.dumps(path))"
+        },
+        "testCases": [
+            {
+                "input": null,
+                "expectedOutput": "[[0,0],[0,1],[0,2],[0,3],[1,3],[2,3],[3,3],[3,2],[3,1],[3,0],[2,0],[1,0],[0,0]]",
+                "description": "Complete square path"
+            }
+        ]
+    },
+    {
+        "id": "grid_path_002",
+        "title": "Diagonal Dancer",
+        "difficulty": "beginner",
+        "description": "Move a toy from position (0, 0) to position (4, 4) by moving diagonally (one step right, one step down, repeat).",
+        "instructions": "Generate a path that moves diagonally across a 5x5 grid from top-left to bottom-right. Each move should increment both row and column by 1.\n\nUse a loop to generate the diagonal path efficiently.",
+        "gridSize": {
+            "rows": 5,
+            "cols": 5
+        },
+        "startPosition": [
+            0,
+            0
+        ],
+        "expectedPath": [
+            [
+                0,
+                0
+            ],
+            [
+                1,
+                1
+            ],
+            [
+                2,
+                2
+            ],
+            [
+                3,
+                3
+            ],
+            [
+                4,
+                4
+            ]
+        ],
+        "hints": [
+            "Both row and column increase together",
+            "Use a single loop that runs 5 times",
+            "Each iteration adds one diagonal position"
+        ],
+        "starterCode": {
+            "javascript": "let path = [];\n\n// Write a loop to create the diagonal path\n\nconsole.log(JSON.stringify(path));",
+            "python": "path = []\n\n# Write a loop to create the diagonal path\n\nimport json\nprint(json.dumps(path))"
+        },
+        "testCases": [
+            {
+                "input": null,
+                "expectedOutput": "[[0,0],[1,1],[2,2],[3,3],[4,4]]",
+                "description": "Diagonal path from corner to corner"
+            }
+        ]
+    },
+    {
+        "id": "grid_path_003",
+        "title": "Spiral Explorer",
+        "difficulty": "intermediate",
+        "description": "Create a spiral path starting from (0, 0) on a 5x5 grid. Move right, then down, then left, then up, each time reducing the steps by one less than the previous direction until you reach the center.",
+        "instructions": "Generate a spiral pattern starting from the top-left corner:\n- Right 4 steps\n- Down 4 steps  \n- Left 3 steps\n- Up 3 steps\n- Right 2 steps\n- Down 2 steps\n- Left 1 step\n- Up 1 step\n\nUse nested loops or a smart loop structure to avoid repetitive code.",
+        "gridSize": {
+            "rows": 5,
+            "cols": 5
+        },
+        "startPosition": [
+            0,
+            0
+        ],
+        "expectedPath": [
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                1
+            ],
+            [
+                0,
+                2
+            ],
+            [
+                0,
+                3
+            ],
+            [
+                0,
+                4
+            ],
+            [
+                1,
+                4
+            ],
+            [
+                2,
+                4
+            ],
+            [
+                3,
+                4
+            ],
+            [
+                4,
+                4
+            ],
+            [
+                4,
+                3
+            ],
+            [
+                4,
+                2
+            ],
+            [
+                4,
+                1
+            ],
+            [
+                3,
+                1
+            ],
+            [
+                2,
+                1
+            ],
+            [
+                1,
+                1
+            ],
+            [
+                1,
+                2
+            ],
+            [
+                1,
+                3
+            ],
+            [
+                2,
+                3
+            ],
+            [
+                3,
+                3
+            ],
+            [
+                3,
+                2
+            ],
+            [
+                2,
+                2
+            ]
+        ],
+        "hints": [
+            "Track direction changes: right, down, left, up",
+            "The number of steps decreases in a pattern",
+            "Use arrays to define direction vectors: [0,1], [1,0], [0,-1], [-1,0]"
+        ],
+        "starterCode": {
+            "javascript": "let path = [[0, 0]];\nlet row = 0, col = 0;\n\n// Define directions: right, down, left, up\nconst directions = [[0, 1], [1, 0], [0, -1], [-1, 0]];\n\n// Write your spiral generation logic here\n\nconsole.log(JSON.stringify(path));",
+            "python": "path = [[0, 0]]\nrow, col = 0, 0\n\n# Define directions: right, down, left, up\ndirections = [[0, 1], [1, 0], [0, -1], [-1, 0]]\n\n# Write your spiral generation logic here\n\nimport json\nprint(json.dumps(path))"
+        },
+        "testCases": [
+            {
+                "input": null,
+                "expectedOutput": "[[0,0],[0,1],[0,2],[0,3],[0,4],[1,4],[2,4],[3,4],[4,4],[4,3],[4,2],[4,1],[3,1],[2,1],[1,1],[1,2],[1,3],[2,3],[3,3],[3,2],[2,2]]",
+                "description": "Clockwise spiral to center"
+            }
+        ]
+    },
+    {
+        "id": "grid_path_004",
+        "title": "Zigzag Journey",
+        "difficulty": "intermediate",
+        "description": "Create a zigzag pattern across a 6x6 grid. Start at (0, 0), move right to the end, drop down one row, move left to the start, drop down one row, and repeat.",
+        "instructions": "Generate a path that creates a zigzag (snake) pattern:\n- Row 0: Move right from column 0 to 5\n- Row 1: Move left from column 5 to 0\n- Row 2: Move right from column 0 to 5\n- Row 3: Move left from column 5 to 0\n- Continue for all 6 rows\n\nUse loops to avoid hardcoding each row.",
+        "gridSize": {
+            "rows": 6,
+            "cols": 6
+        },
+        "startPosition": [
+            0,
+            0
+        ],
+        "expectedPath": [
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                1
+            ],
+            [
+                0,
+                2
+            ],
+            [
+                0,
+                3
+            ],
+            [
+                0,
+                4
+            ],
+            [
+                0,
+                5
+            ],
+            [
+                1,
+                5
+            ],
+            [
+                1,
+                4
+            ],
+            [
+                1,
+                3
+            ],
+            [
+                1,
+                2
+            ],
+            [
+                1,
+                1
+            ],
+            [
+                1,
+                0
+            ],
+            [
+                2,
+                0
+            ],
+            [
+                2,
+                1
+            ],
+            [
+                2,
+                2
+            ],
+            [
+                2,
+                3
+            ],
+            [
+                2,
+                4
+            ],
+            [
+                2,
+                5
+            ],
+            [
+                3,
+                5
+            ],
+            [
+                3,
+                4
+            ],
+            [
+                3,
+                3
+            ],
+            [
+                3,
+                2
+            ],
+            [
+                3,
+                1
+            ],
+            [
+                3,
+                0
+            ],
+            [
+                4,
+                0
+            ],
+            [
+                4,
+                1
+            ],
+            [
+                4,
+                2
+            ],
+            [
+                4,
+                3
+            ],
+            [
+                4,
+                4
+            ],
+            [
+                4,
+                5
+            ],
+            [
+                5,
+                5
+            ],
+            [
+                5,
+                4
+            ],
+            [
+                5,
+                3
+            ],
+            [
+                5,
+                2
+            ],
+            [
+                5,
+                1
+            ],
+            [
+                5,
+                0
+            ]
+        ],
+        "hints": [
+            "Use a loop for each row",
+            "Check if the row number is even or odd to determine direction",
+            "For even rows, move left to right; for odd rows, move right to left"
+        ],
+        "starterCode": {
+            "javascript": "let path = [];\nconst rows = 6;\nconst cols = 6;\n\n// Write your zigzag generation logic\n\nconsole.log(JSON.stringify(path));",
+            "python": "path = []\nrows = 6\ncols = 6\n\n# Write your zigzag generation logic\n\nimport json\nprint(json.dumps(path))"
+        },
+        "testCases": [
+            {
+                "input": null,
+                "expectedOutput": "[[0,0],[0,1],[0,2],[0,3],[0,4],[0,5],[1,5],[1,4],[1,3],[1,2],[1,1],[1,0],[2,0],[2,1],[2,2],[2,3],[2,4],[2,5],[3,5],[3,4],[3,3],[3,2],[3,1],[3,0],[4,0],[4,1],[4,2],[4,3],[4,4],[4,5],[5,5],[5,4],[5,3],[5,2],[5,1],[5,0]]",
+                "description": "Complete zigzag pattern"
+            }
+        ]
+    },
+    {
+        "id": "grid_path_005",
+        "title": "Knight's Tour Mini",
+        "difficulty": "advanced",
+        "description": "Move a chess knight on a 5x5 grid starting from (0, 0). A knight moves in an 'L' shape: 2 squares in one direction and 1 square perpendicular. Create a specific path visiting at least 10 unique positions.",
+        "instructions": "Generate a path using valid knight moves (L-shaped: ±2 rows and ±1 column, or ±1 row and ±2 columns).\n\nRequired path:\n(0,0) → (2,1) → (4,2) → (3,0) → (1,1) → (3,2) → (4,4) → (2,3) → (0,4) → (1,2)\n\nUse loops and the knight's possible move patterns to generate this path programmatically.",
+        "gridSize": {
+            "rows": 5,
+            "cols": 5
+        },
+        "startPosition": [
+            0,
+            0
+        ],
+        "expectedPath": [
+            [
+                0,
+                0
+            ],
+            [
+                2,
+                1
+            ],
+            [
+                4,
+                2
+            ],
+            [
+                3,
+                0
+            ],
+            [
+                1,
+                1
+            ],
+            [
+                3,
+                2
+            ],
+            [
+                4,
+                4
+            ],
+            [
+                2,
+                3
+            ],
+            [
+                0,
+                4
+            ],
+            [
+                1,
+                2
+            ]
+        ],
+        "hints": [
+            "Knight moves: [±2, ±1] or [±1, ±2]",
+            "Define all 8 possible knight moves as an array",
+            "Use loops to check valid moves from current position",
+            "Store the target sequence and generate moves to match"
+        ],
+        "starterCode": {
+            "javascript": "let path = [[0, 0]];\nlet current = [0, 0];\n\n// Knight's 8 possible moves\nconst knightMoves = [\n  [2, 1], [2, -1], [-2, 1], [-2, -1],\n  [1, 2], [1, -2], [-1, 2], [-1, -2]\n];\n\n// Target positions to visit in order\nconst targets = [[2,1], [4,2], [3,0], [1,1], [3,2], [4,4], [2,3], [0,4], [1,2]];\n\n// Generate the path\n\nconsole.log(JSON.stringify(path));",
+            "python": "path = [[0, 0]]\ncurrent = [0, 0]\n\n# Knight's 8 possible moves\nknight_moves = [\n    [2, 1], [2, -1], [-2, 1], [-2, -1],\n    [1, 2], [1, -2], [-1, 2], [-1, -2]\n]\n\n# Target positions to visit in order\ntargets = [[2,1], [4,2], [3,0], [1,1], [3,2], [4,4], [2,3], [0,4], [1,2]]\n\n# Generate the path\n\nimport json\nprint(json.dumps(path))"
+        },
+        "testCases": [
+            {
+                "input": null,
+                "expectedOutput": "[[0,0],[2,1],[4,2],[3,0],[1,1],[3,2],[4,4],[2,3],[0,4],[1,2]]",
+                "description": "Valid knight moves sequence"
+            }
+        ]
+    },
+    {
+        "id": "grid_path_006",
+        "title": "Border Patrol",
+        "difficulty": "beginner",
+        "description": "Move a toy around the complete border of a 4x4 grid, starting and ending at (0, 0).",
+        "instructions": "Create a path that traces the outer border of the grid clockwise:\n- Start at (0, 0)\n- Move right along the top edge\n- Move down along the right edge\n- Move left along the bottom edge\n- Move up along the left edge back to start\n\nUse loops for each edge.",
+        "gridSize": {
+            "rows": 4,
+            "cols": 4
+        },
+        "startPosition": [
+            0,
+            0
+        ],
+        "expectedPath": [
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                1
+            ],
+            [
+                0,
+                2
+            ],
+            [
+                0,
+                3
+            ],
+            [
+                1,
+                3
+            ],
+            [
+                2,
+                3
+            ],
+            [
+                3,
+                3
+            ],
+            [
+                3,
+                2
+            ],
+            [
+                3,
+                1
+            ],
+            [
+                3,
+                0
+            ],
+            [
+                2,
+                0
+            ],
+            [
+                1,
+                0
+            ],
+            [
+                0,
+                0
+            ]
+        ],
+        "hints": [
+            "Four separate loops for four edges",
+            "Top edge: row=0, col increases",
+            "Right edge: col=3, row increases",
+            "Bottom edge: row=3, col decreases",
+            "Left edge: col=0, row decreases"
+        ],
+        "starterCode": {
+            "javascript": "let path = [[0, 0]];\nlet row = 0, col = 0;\nconst size = 4;\n\n// Top edge (move right)\n\n// Right edge (move down)\n\n// Bottom edge (move left)\n\n// Left edge (move up)\n\nconsole.log(JSON.stringify(path));",
+            "python": "path = [[0, 0]]\nrow, col = 0, 0\nsize = 4\n\n# Top edge (move right)\n\n# Right edge (move down)\n\n# Bottom edge (move left)\n\n# Left edge (move up)\n\nimport json\nprint(json.dumps(path))"
+        },
+        "testCases": [
+            {
+                "input": null,
+                "expectedOutput": "[[0,0],[0,1],[0,2],[0,3],[1,3],[2,3],[3,3],[3,2],[3,1],[3,0],[2,0],[1,0],[0,0]]",
+                "description": "Complete border path"
+            }
+        ]
+    }
+]

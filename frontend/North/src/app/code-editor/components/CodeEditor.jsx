@@ -5,7 +5,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { python } from '@codemirror/lang-python';
 import { java } from '@codemirror/lang-java';
 import { cpp } from '@codemirror/lang-cpp';
-import { noirTheme } from '../themes/noir-theme';
+import { noirTheme, noirSyntax } from '../themes/noir-theme';
 
 /**
  * CodeEditor Component
@@ -36,7 +36,7 @@ const CodeEditor = ({ value,
                 value={value}
                 height="100%"
                 theme={noirTheme}
-                extensions={[getLanguageExtension(language)]}
+                extensions={[getLanguageExtension(language), noirSyntax]}
                 onChange={onChange}
                 readOnly={readOnly}
                 placeholder={placeholder}

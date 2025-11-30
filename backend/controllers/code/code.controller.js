@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
  */
 const executeCode = async (req, res) => {
     try {
-        const { language, version, code, stdin } = req.body;
+        const { language, version, code, stdin, problemId } = req.body;
 
         // Validation
         if (!language || !version || !code) {
@@ -31,6 +31,38 @@ const executeCode = async (req, res) => {
             code,
             stdin || ''
         );
+
+        // If problemId is provided, check for grid validation
+        if (problemId) {
+            const problem = await prisma.codeProblem.findUnique({
+                where: { id: problemId }
+            });
+
+            if (problem && problem.problemType === 'grid-based') {
+                const { validateGridPath } = require('../../utils/gridPathValidator');
+                const constraints = JSON.parse(problem.constraints);
+
+                const validationResult = validateGridPath(
+                    result.stdout,
+                    constraints.expectedPath,
+                    constraints.gridSize
+                );
+
+                return res.status(200).json({
+                    success: true,
+                    data: {
+                        ...result,
+                        gridResult: {
+                            gridSize: constraints.gridSize,
+                            userPath: validationResult.userPath,
+                            expectedPath: constraints.expectedPath,
+                            success: validationResult.success,
+                            message: validationResult.message
+                        }
+                    }
+                });
+            }
+        }
 
         return res.status(200).json({
             success: true,
@@ -76,6 +108,84 @@ const submitCode = async (req, res) => {
             });
         }
 
+        // Check if this is a grid-based problem
+        if (problem.problemType === 'grid-based') {
+            const { validateGridPath } = require('../../utils/gridPathValidator');
+
+            // Execute the code to get output
+            const executionResult = await pistonService.executeCode(
+                language,
+                version,
+                code,
+                ''
+            );
+
+            // Parse constraints from problem
+            const constraints = JSON.parse(problem.constraints);
+
+            // Validate the grid path
+            const validationResult = validateGridPath(
+                executionResult.stdout,
+                constraints.expectedPath,
+                constraints.gridSize
+            );
+
+            // Update progress if successful and user exists
+            if (validationResult.success && userId) {
+                try {
+                    // Check if problem has a module
+                    const problemData = await prisma.codeProblem.findUnique({
+                        where: { id: problemId },
+                        select: { moduleId: true }
+                    });
+
+                    await prisma.problemProgress.upsert({
+                        where: {
+                            userId_problemId: {
+                                userId: userId,
+                                problemId: problemId
+                            }
+                        },
+                        update: {
+                            completed: true,
+                            completedAt: new Date(),
+                            attempts: { increment: 1 }
+                        },
+                        create: {
+                            userId: userId,
+                            problemId: problemId,
+                            moduleId: problemData?.moduleId,
+                            completed: true,
+                            completedAt: new Date(),
+                            attempts: 1
+                        }
+                    });
+
+                    // Also award XP
+                    await prisma.user.update({
+                        where: { id: userId },
+                        data: { xp: { increment: problem.xpReward || 50 } }
+                    });
+                } catch (err) {
+                    console.error('Error updating progress:', err);
+                    // Continue without failing the request
+                }
+            }
+
+            return res.status(200).json({
+                success: validationResult.success,
+                message: validationResult.message,
+                data: {
+                    validationResult,
+                    userPath: validationResult.userPath,
+                    expectedPath: constraints.expectedPath,
+                    gridSize: constraints.gridSize,
+                    xpAwarded: validationResult.success ? (problem.xpReward || 50) : 0,
+                },
+            });
+        }
+
+        // Regular problem validation (existing code)
         // Validate against test cases
         const testResults = await pistonService.validateTestCases(
             language,
@@ -115,6 +225,33 @@ const submitCode = async (req, res) => {
                     xp: { increment: problem.xpReward },
                 },
             });
+
+            // Update problem progress
+            try {
+                await prisma.problemProgress.upsert({
+                    where: {
+                        userId_problemId: {
+                            userId: userId,
+                            problemId: problemId
+                        }
+                    },
+                    update: {
+                        completed: true,
+                        completedAt: new Date(),
+                        attempts: { increment: 1 }
+                    },
+                    create: {
+                        userId: userId,
+                        problemId: problemId,
+                        moduleId: problem.moduleId,
+                        completed: true,
+                        completedAt: new Date(),
+                        attempts: 1
+                    }
+                });
+            } catch (err) {
+                console.error('Error updating standard problem progress:', err);
+            }
 
             // Update leaderboard
             await prisma.leaderboard.upsert({

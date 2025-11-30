@@ -78,7 +78,7 @@ app.use('/leaderboard', getleaderboard)
 app.use('/user', authentication)
 app.use('/quiz', quizRoutes)
 app.use('/badge', badgeRoutes)
-app.use('/profile', userProfileRoutes)
+app.use('/user', userProfileRoutes)
 app.use('/code', codeRoutes)
 app.listen('3005', () => {
   console.log('server is live on 3005')

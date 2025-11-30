@@ -14,10 +14,10 @@ class PistonService {
      * @param {string} version - Language version (e.g., '18.15.0' for Node.js)
      * @param {string} code - Source code to execute
      * @param {string} stdin - Standard input for the program (optional)
-     * @param {number} timeout - Execution timeout in milliseconds (default: 3000)
+     * @param {number} timeout - Execution timeout in milliseconds (default: 10000)
      * @returns {Promise<Object>} Execution result with stdout, stderr, and metadata
      */
-    async executeCode(language, version, code, stdin = '', timeout = 3000) {
+    async executeCode(language, version, code, stdin = '', timeout = 10000) {
         try {
             const response = await axios.post(
                 `${PISTON_API_URL}/execute`,
