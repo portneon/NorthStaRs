@@ -122,24 +122,14 @@ export const getUserModules = async (userId) => {
     });
 
     if (!response.ok) {
-
-      return [
-        { title: "Advanced Algorithms", subTitle: "Module_04", progress: 75 },
-        { title: "System Design", subTitle: "Module_02", progress: 30 },
-        { title: "React Patterns", subTitle: "Module_09", progress: 12 },
-        { title: "Data Structures", subTitle: "Module_01", progress: 100 }
-      ];
+      return [];
     }
 
     const data = await response.json();
     return data.modules;
   } catch (error) {
     console.error('Failed to fetch modules:', error);
-    // Return default modules on error
-    return [
-      { title: "Advanced Algorithms", subTitle: "Module_04", progress: 75 },
-      { title: "System Design", subTitle: "Module_02", progress: 30 }
-    ];
+    return [];
   }
 };
 
@@ -158,14 +148,8 @@ export const getUserStats = async (userId) => {
 
     return response.json();
   } catch (error) {
-    // Return mock data on error
-    return {
-      totalHours: 42.5,
-      activeModules: 3,
-      globalRank: 842,
-      streak: 14,
-      xpGoal: 87,
-    };
+    console.error('Failed to fetch user stats:', error);
+    throw error;
   }
 };
 

@@ -2,7 +2,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 
-function Hero({ streak = 14, xpGoal = 87, username = 'Architect', level = 1 }) {
+function Hero({ streak = 0, xpGoal = 0, username = '', level = 1 }) {
     const router = useRouter();
 
     return (

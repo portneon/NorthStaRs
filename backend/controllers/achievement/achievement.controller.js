@@ -1,9 +1,65 @@
 const prisma = require('../../prisma/prisma');
 
+// Sync achievements based on current user stats
+const syncAchievements = async (userId) => {
+  try {
+    // Get user stats
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { level: true, streakCount: true }
+    });
+
+    if (!user) return;
+
+    // Get quiz/problem counts
+    const quizCount = await prisma.attempt.count({
+      where: { userId, completed: true }
+    });
+
+    const problemCount = await prisma.problemProgress.count({
+      where: { userId, completed: true }
+    });
+
+    const totalCompleted = quizCount + problemCount;
+
+    // Get all achievements
+    const achievements = await prisma.achievement.findMany();
+
+    for (const achievement of achievements) {
+      let shouldUnlock = false;
+
+      switch (achievement.triggerType) {
+        case 'QUIZ_COMPLETED': // Also covers problems now
+          if (achievement.name === 'First Steps' && totalCompleted >= 1) shouldUnlock = true;
+          if (achievement.name === 'Quiz Novice' && totalCompleted >= 5) shouldUnlock = true;
+          if (achievement.name === 'Quiz Master' && totalCompleted >= 25) shouldUnlock = true;
+          break;
+
+        case 'STREAK_UPDATED':
+          if (achievement.name === 'Week of Learning' && user.streakCount >= 7) shouldUnlock = true;
+          break;
+
+        case 'LEVEL_UP':
+          if (achievement.name === 'Rising Star' && user.level >= 5) shouldUnlock = true;
+          break;
+      }
+
+      if (shouldUnlock) {
+        await exports.unlockAchievement(userId, achievement.name);
+      }
+    }
+  } catch (error) {
+    console.error('Error syncing achievements:', error);
+  }
+};
+
 // Get all achievements for a user
 exports.getUserAchievements = async (req, res) => {
   try {
     const { userId } = req.params;
+
+    // Sync achievements first to ensure they are up to date
+    await syncAchievements(userId);
 
     const achievements = await prisma.userAchievement.findMany({
       where: { userId },
@@ -22,57 +78,6 @@ exports.getUserAchievements = async (req, res) => {
   }
 };
 
-// Unlock an achievement for a user
-exports.unlockAchievement = async (userId, achievementName) => {
-  try {
-    // Check if achievement exists
-    const achievement = await prisma.achievement.findUnique({
-      where: { name: achievementName }
-    });
-
-    if (!achievement) {
-      console.log(`Achievement ${achievementName} not found`);
-      return null;
-    }
-
-    // Check if user already has this achievement
-    const existing = await prisma.userAchievement.findFirst({
-      where: {
-        userId,
-        achievementId: achievement.id
-      }
-    });
-
-    if (existing) {
-      return null; // Already unlocked
-    }
-
-    // Unlock the achievement
-    const userAchievement = await prisma.userAchievement.create({
-      data: {
-        userId,
-        achievementId: achievement.id
-      },
-      include: {
-        achievement: true
-      }
-    });
-
-    // Add XP to user
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        xp: { increment: achievement.xpReward }
-      }
-    });
-
-    return userAchievement;
-  } catch (error) {
-    console.error('Error unlocking achievement:', error);
-    return null;
-  }
-};
-
 // Check and unlock achievements based on user actions
 exports.checkAchievements = async (userId, actionType, actionData) => {
   try {
@@ -86,41 +91,36 @@ exports.checkAchievements = async (userId, actionType, actionData) => {
 
     for (const achievement of achievements) {
       let shouldUnlock = false;
-      
+
       // Check achievement conditions based on action type
       switch (actionType) {
         case 'QUIZ_COMPLETED':
-          const quizCount = await prisma.attempt.count({
-            where: { 
-              userId,
-              completed: true 
-            }
-          });
-          
-          if (achievement.name === 'Quiz Novice' && quizCount >= 1) {
-            shouldUnlock = true;
-          } else if (achievement.name === 'Quiz Master' && quizCount >= 10) {
-            shouldUnlock = true;
-          } else if (achievement.name === 'Perfect Score' && actionData.score === 100) {
-            shouldUnlock = true;
-          }
+          // Re-fetch counts to be safe
+          const quizCount = await prisma.attempt.count({ where: { userId, completed: true } });
+          const problemCount = await prisma.problemProgress.count({ where: { userId, completed: true } });
+          const totalCompleted = quizCount + problemCount;
+
+          if (achievement.name === 'First Steps' && totalCompleted >= 1) shouldUnlock = true;
+          else if (achievement.name === 'Quiz Novice' && totalCompleted >= 5) shouldUnlock = true;
+          else if (achievement.name === 'Quiz Master' && totalCompleted >= 25) shouldUnlock = true;
+          else if (achievement.name === 'Perfect Score' && actionData.score === 100) shouldUnlock = true;
           break;
-          
+
         case 'STREAK_UPDATED':
           if (actionData.streakCount >= 7) {
             shouldUnlock = true;
           }
           break;
-          
+
         case 'LEVEL_UP':
           if (actionData.level >= 5) {
             shouldUnlock = true;
           }
           break;
       }
-      
+
       if (shouldUnlock) {
-        const unlockedAchievement = await this.unlockAchievement(userId, achievement.name);
+        const unlockedAchievement = await exports.unlockAchievement(userId, achievement.name);
         if (unlockedAchievement) {
           unlocked.push(unlockedAchievement);
         }

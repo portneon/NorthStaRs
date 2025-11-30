@@ -10,7 +10,8 @@ export default function GridVisualizer({
     gridSize,
     expectedPath,
     userPath,
-    onTryAgain
+    onTryAgain,
+    onComplete
 }) {
     const [currentStep, setCurrentStep] = useState(0);
     const [animating, setAnimating] = useState(false);
@@ -60,9 +61,13 @@ export default function GridVisualizer({
             return () => clearTimeout(timer);
         } else {
             setAnimating(false);
-            setStatus(mismatchIndex === -1 ? 'success' : 'failed');
+            const isSuccess = mismatchIndex === -1;
+            setStatus(isSuccess ? 'success' : 'failed');
+            if (isSuccess && onComplete) {
+                setTimeout(onComplete, 1000); // Delay slightly to show success state
+            }
         }
-    }, [currentStep, animating, userPath, mismatchIndex]);
+    }, [currentStep, animating, userPath, mismatchIndex, onComplete]);
 
     const startAnimation = () => {
         setCurrentStep(0);

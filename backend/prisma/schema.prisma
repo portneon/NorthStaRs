@@ -198,6 +198,9 @@ model CodeProblem {
   problemType String?  @default("standard")
   constraints String?  @db.Text
   
+  instructions String?  @db.Text
+  hints       Json?
+  
   moduleId    String?
   module      Module?  @relation(fields: [moduleId], references: [id], onDelete: SetNull)
   

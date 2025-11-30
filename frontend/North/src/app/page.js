@@ -1,11 +1,13 @@
-'use client';
+"use client";
 import { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import Stats from '@/components/Stats';
 import ModuleCard from '@/components/ModuleCard';
-import { getUserStats, getLeaderboard, getCurrentUser, getUserModules } from '@/app/utils/api';
+import IntroPage from '@/components/IntroPage';
+import { getUserStats, getLeaderboard, getCurrentUser, getUserModules, getUserAchievements } from '@/app/utils/api';
 
 export default function HomePage() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState({
     totalHours: '0.0',
     activeModules: '00',
@@ -16,61 +18,81 @@ export default function HomePage() {
     level: 1
   });
   const [modules, setModules] = useState([]);
+  const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchUserData() {
+    const checkAuthAndFetchData = async () => {
       try {
-        // Get current logged-in user
         const currentUser = getCurrentUser();
 
         if (currentUser && currentUser.id) {
-          // Fetch user stats
-          const userStats = await getUserStats(currentUser.id);
+          setIsAuthenticated(true);
 
-          // Fetch leaderboard to get user's rank
-          const leaderboardData = await getLeaderboard();
-          const userRank = leaderboardData.findIndex(u => u.id === currentUser.id) + 1;
+          try {
+            // Fetch all user data in parallel
+            const [userStats, leaderboardData, userModules, userAchievements] = await Promise.all([
+              getUserStats(currentUser.id).catch(e => ({})),
+              getLeaderboard().catch(e => []),
+              getUserModules(currentUser.id).catch(e => []),
+              getUserAchievements(currentUser.id).catch(e => [])
+            ]);
 
-          // Fetch user's active modules
-          const userModules = await getUserModules(currentUser.id);
+            const userRank = Array.isArray(leaderboardData)
+              ? leaderboardData.findIndex(u => u.id === currentUser.id) + 1
+              : 0;
 
-          setStats({
-            totalHours: userStats.totalHours || 0,
-            activeModules: String(userStats.activeModules || 0).padStart(2, '0'),
-            globalRank: userRank > 0 ? `#${userRank}` : '#---',
-            streak: userStats.streak || 0,
-            xpGoal: userStats.xpGoal || 0,
-            username: currentUser.username || 'Architect',
-            level: currentUser.level || 1
-          });
-          setModules(userModules);
+            setStats({
+              totalHours: userStats.totalHours || '0.0',
+              activeModules: String(userStats.activeModules || 0).padStart(2, '0'),
+              globalRank: userRank > 0 ? `#${userRank}` : '#---',
+              streak: userStats.streak || 0,
+              xpGoal: userStats.xpGoal || 0,
+              username: currentUser.username || 'Architect',
+              level: currentUser.level || 1
+            });
+            setModules(userModules || []);
+            setAchievements(userAchievements || []);
+          } catch (dataError) {
+            console.error('Error fetching user dashboard data:', dataError);
+            // Don't log out user just because data fetch failed
+          }
         } else {
-          // Default stats for non-logged-in users
-          setStats({
-            totalHours: '42.5',
-            activeModules: '03',
-            globalRank: '#---',
-            streak: 14,
-            xpGoal: 87,
-          });
-          setModules([
-            { title: "Advanced Algorithms", subTitle: "Module_04", progress: 75 },
-            { title: "System Design", subTitle: "Module_02", progress: 30 },
-            { title: "React Patterns", subTitle: "Module_09", progress: 12 },
-            { title: "Data Structures", subTitle: "Module_01", progress: 100 }
-          ]);
+          setIsAuthenticated(false);
         }
       } catch (error) {
-        console.error('Error fetching user data:', error);
-        // Keep default stats on error
+        console.error('Auth check failed:', error);
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
-    }
+    };
 
-    fetchUserData();
+    checkAuthAndFetchData();
+
+    // Listen for auth changes (login/logout)
+    const handleAuthChange = () => {
+      checkAuthAndFetchData();
+    };
+
+    window.addEventListener('auth-change', handleAuthChange);
+    return () => window.removeEventListener('auth-change', handleAuthChange);
   }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-2 border-zinc-800 border-t-lime-400 rounded-full animate-spin"></div>
+          <span className="font-mono text-xs text-lime-400 tracking-widest animate-pulse">INITIALIZING...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <IntroPage />;
+  }
 
   return (
     <div className="w-full max-w-[1920px] mx-auto border-x border-zinc-800">
@@ -83,19 +105,19 @@ export default function HomePage() {
       <div className="grid grid-cols-12 border-b border-zinc-800">
         <Stats
           label="TOTAL_HOURS"
-          value={loading ? '...' : stats.totalHours}
+          value={stats.totalHours}
           trend="+12% vs last week"
           positive={true}
         />
         <Stats
           label="MODULES_ACTIVE"
-          value={loading ? '...' : stats.activeModules}
+          value={stats.activeModules}
           trend="Optimal Load"
           positive={true}
         />
         <Stats
           label="GLOBAL_RANK"
-          value={loading ? '...' : stats.globalRank}
+          value={stats.globalRank}
           trend="-4 Positions"
           positive={false}
         />
@@ -106,22 +128,48 @@ export default function HomePage() {
           positive={true}
         />
       </div>
+
+      {/* Achievements Section */}
+      {achievements.length > 0 && (
+        <div className="border-b border-zinc-800 bg-[#0a0a0a] p-8">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="w-1.5 h-1.5 bg-[#CCFF00]"></span>
+            <h2 className="text-sm font-mono text-[#555555] uppercase tracking-widest">
+              Unlocked_Achievements
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {achievements.map((ua) => (
+              <div key={ua.id} className="border border-[#333333] bg-[#080808] p-4 flex items-center gap-4 hover:border-[#CCFF00] transition-colors group">
+                <div className="w-10 h-10 border border-[#333333] flex items-center justify-center bg-[#0a0a0a] group-hover:bg-[#CCFF00]/10 transition-colors text-xl">
+                  {getIcon(ua.achievement.icon)}
+                </div>
+                <div>
+                  <h3 className="text-white text-xs font-bold uppercase tracking-wide group-hover:text-[#CCFF00] transition-colors">
+                    {ua.achievement.name}
+                  </h3>
+                  <p className="text-[#555555] text-[10px] font-mono mt-1">
+                    {new Date(ua.unlockedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-12">
         <div className="col-span-12 p-4 bg-zinc-900 border-b border-zinc-800 flex items-center justify-between">
           <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest">Active Curriculum</span>
           <div className="flex gap-2">
             <div className="w-1 h-1 bg-lime-400 rounded-full animate-ping"></div>
             <span className="font-mono text-xs text-lime-400">
-              {loading ? 'LOADING...' : 'LIVE'}
+              LIVE
             </span>
           </div>
         </div>
 
-        {loading ? (
-          <div className="col-span-12 p-8 text-center font-mono text-zinc-500">
-            LOADING_MODULES...
-          </div>
-        ) : modules.length > 0 ? (
+        {modules.length > 0 ? (
           modules.map((module, idx) => (
             <ModuleCard
               key={module.id || idx}
@@ -151,3 +199,19 @@ export default function HomePage() {
     </div>
   );
 }
+
+// Helper to map icon names to emojis or SVGs (duplicated for now, ideally in a utils file)
+const getIcon = (iconName) => {
+  const icons = {
+    trophy: '🏆',
+    award: '🎖️',
+    crown: '👑',
+    star: '⭐',
+    flame: '🔥',
+    zap: '⚡',
+    code: '💻',
+    bug: '🐛',
+    rocket: '🚀'
+  };
+  return icons[iconName] || '🏆';
+};

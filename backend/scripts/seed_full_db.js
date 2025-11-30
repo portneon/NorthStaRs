@@ -143,10 +143,10 @@ async function seedGridProblems() {
                             constraints: JSON.stringify({
                                 gridSize: problem.gridSize,
                                 startPosition: problem.startPosition,
-                                instructions: problem.instructions,
-                                hints: problem.hints,
                                 expectedPath: problem.expectedPath
                             }),
+                            instructions: problem.instructions,
+                            hints: problem.hints,
                             xpReward: 150,
                             moduleId: advancedModule?.id
                         }
@@ -165,16 +165,16 @@ async function seedGridProblems() {
                     }
                     console.log(`   ✅ Created grid problem: ${problem.title}`);
                 } else {
-                    // Update module link if missing
-                    if (advancedModule && !existing.moduleId) {
-                        await prisma.codeProblem.update({
-                            where: { id: existing.id },
-                            data: { moduleId: advancedModule.id }
-                        });
-                        console.log(`   🔗 Linked existing grid problem to module: ${problem.title}`);
-                    } else {
-                        console.log(`   ⏭️  Grid problem already exists: ${problem.title}`);
-                    }
+                    // Update existing problem with new fields
+                    await prisma.codeProblem.update({
+                        where: { id: existing.id },
+                        data: {
+                            instructions: problem.instructions,
+                            hints: problem.hints,
+                            moduleId: advancedModule?.id // Ensure module is linked
+                        }
+                    });
+                    console.log(`   🔄 Updated existing grid problem: ${problem.title}`);
                 }
             }
         } else {

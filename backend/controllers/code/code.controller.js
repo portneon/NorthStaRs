@@ -131,6 +131,8 @@ const submitCode = async (req, res) => {
             );
 
             // Update progress if successful and user exists
+            let xpAwarded = 0;
+            let newAchievements = [];
             if (validationResult.success && userId) {
                 try {
                     // Check if problem has a module
@@ -138,6 +140,18 @@ const submitCode = async (req, res) => {
                         where: { id: problemId },
                         select: { moduleId: true }
                     });
+
+                    // Check if already completed
+                    const existingProgress = await prisma.problemProgress.findUnique({
+                        where: {
+                            userId_problemId: {
+                                userId: userId,
+                                problemId: problemId
+                            }
+                        }
+                    });
+
+                    const isFirstCompletion = !existingProgress || !existingProgress.completed;
 
                     await prisma.problemProgress.upsert({
                         where: {
@@ -161,11 +175,44 @@ const submitCode = async (req, res) => {
                         }
                     });
 
-                    // Also award XP
-                    await prisma.user.update({
-                        where: { id: userId },
-                        data: { xp: { increment: problem.xpReward || 50 } }
-                    });
+                    if (isFirstCompletion) {
+                        // Calculate new level based on total XP
+                        // Formula: Level = floor(sqrt(XP / 50)) + 1
+                        const user = await prisma.user.findUnique({
+                            where: { id: userId },
+                            select: { xp: true }
+                        });
+
+                        const currentXP = user.xp;
+
+                        // Calculate XP based on difficulty
+                        const difficultyXP = {
+                            'Beginner': 50,
+                            'Easy': 50,
+                            'Intermediate': 150,
+                            'Medium': 150,
+                            'Hard': 500,
+                            'Advanced': 500
+                        };
+                        xpAwarded = difficultyXP[problem.difficulty] || 50;
+
+                        const newXP = currentXP + xpAwarded;
+                        const newLevel = Math.floor(Math.sqrt(newXP / 50)) + 1;
+
+                        // Update User with new XP and Level
+                        await prisma.user.update({
+                            where: { id: userId },
+                            data: {
+                                xp: newXP,
+                                level: newLevel
+                            }
+                        });
+
+                        // Check for achievements
+                        const { checkAchievements } = require('../../controllers/achievement/achievement.controller');
+                        const levelAchievements = await checkAchievements(userId, 'LEVEL_UP', { level: newLevel });
+                        newAchievements = [...newAchievements, ...levelAchievements];
+                    }
                 } catch (err) {
                     console.error('Error updating progress:', err);
                     // Continue without failing the request
@@ -180,7 +227,8 @@ const submitCode = async (req, res) => {
                     userPath: validationResult.userPath,
                     expectedPath: constraints.expectedPath,
                     gridSize: constraints.gridSize,
-                    xpAwarded: validationResult.success ? (problem.xpReward || 50) : 0,
+                    xpAwarded: xpAwarded,
+                    newAchievements: newAchievements
                 },
             });
         }
@@ -218,13 +266,64 @@ const submitCode = async (req, res) => {
         });
 
         // Award XP if all tests passed
+        let xpAwarded = 0;
         if (testResults.allPassed) {
-            await prisma.user.update({
-                where: { id: userId },
-                data: {
-                    xp: { increment: problem.xpReward },
-                },
+            // Check if already completed
+            const existingProgress = await prisma.problemProgress.findUnique({
+                where: {
+                    userId_problemId: {
+                        userId: userId,
+                        problemId: problemId
+                    }
+                }
             });
+
+            const isFirstCompletion = !existingProgress || !existingProgress.completed;
+
+            if (isFirstCompletion) {
+                // Calculate new level
+                const user = await prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { xp: true }
+                });
+
+                const currentXP = user.xp;
+
+                // Calculate XP based on difficulty
+                const difficultyXP = {
+                    'Beginner': 50,
+                    'Easy': 50,
+                    'Intermediate': 150,
+                    'Medium': 150,
+                    'Hard': 500,
+                    'Advanced': 500
+                };
+                xpAwarded = difficultyXP[problem.difficulty] || 50;
+
+                const newXP = currentXP + xpAwarded;
+                const newLevel = Math.floor(Math.sqrt(newXP / 50)) + 1;
+
+                await prisma.user.update({
+                    where: { id: userId },
+                    data: {
+                        xp: newXP,
+                        level: newLevel
+                    },
+                });
+
+                // Update leaderboard
+                await prisma.leaderboard.upsert({
+                    where: { userId },
+                    update: {
+                        totalXP: newXP, // Use absolute new XP
+                        lastUpdated: new Date(),
+                    },
+                    create: {
+                        userId,
+                        totalXP: newXP,
+                    },
+                });
+            }
 
             // Update problem progress
             try {
@@ -252,27 +351,34 @@ const submitCode = async (req, res) => {
             } catch (err) {
                 console.error('Error updating standard problem progress:', err);
             }
-
-            // Update leaderboard
-            await prisma.leaderboard.upsert({
-                where: { userId },
-                update: {
-                    totalXP: { increment: problem.xpReward },
-                    lastUpdated: new Date(),
-                },
-                create: {
-                    userId,
-                    totalXP: problem.xpReward,
-                },
-            });
         }
+
+        // Check for achievements
+        const { checkAchievements } = require('../../controllers/achievement/achievement.controller');
+        let newAchievements = [];
+
+        // Check for LEVEL_UP achievements
+        const levelAchievements = await checkAchievements(userId, 'LEVEL_UP', { level: newLevel });
+        newAchievements = [...newAchievements, ...levelAchievements];
+
+        // Check for QUIZ_COMPLETED achievements (mapped to problem completion here for simplicity, or add new type)
+        // For now, let's treat coding problems as "quizzes" for the sake of the existing achievement types
+        // or better, add a PROBLEM_SOLVED type. But to use existing "Quiz Novice" etc, we might need to adapt.
+        // Actually, let's stick to what's in achievement.controller.js or add a new type there.
+        // The existing types are QUIZ_COMPLETED, STREAK_UPDATED, LEVEL_UP.
+        // Let's check for LEVEL_UP as we just updated level.
+
+        // Also check for "First Steps" if this is the first problem? 
+        // The current achievement controller checks "Attempt" table for quizzes. 
+        // We should probably update achievement controller to check ProblemProgress too, but for now let's just trigger LEVEL_UP.
 
         return res.status(200).json({
             success: true,
             data: {
                 submission,
                 testResults,
-                xpAwarded: testResults.allPassed ? problem.xpReward : 0,
+                xpAwarded: xpAwarded,
+                newAchievements: newAchievements
             },
         });
     } catch (error) {
@@ -289,8 +395,14 @@ const submitCode = async (req, res) => {
  * Get all coding problems
  * GET /code/problems
  */
+/**
+ * Get all coding problems
+ * GET /code/problems
+ */
 const getProblems = async (req, res) => {
     try {
+        const { userId } = req.query;
+
         const problems = await prisma.codeProblem.findMany({
             select: {
                 id: true,
@@ -304,9 +416,29 @@ const getProblems = async (req, res) => {
             orderBy: { createdAt: 'desc' },
         });
 
+        let problemsWithStatus = problems;
+
+        if (userId) {
+            // Fetch progress for this user
+            const progress = await prisma.problemProgress.findMany({
+                where: {
+                    userId: userId,
+                    completed: true
+                },
+                select: { problemId: true }
+            });
+
+            const completedProblemIds = new Set(progress.map(p => p.problemId));
+
+            problemsWithStatus = problems.map(problem => ({
+                ...problem,
+                isSolved: completedProblemIds.has(problem.id)
+            }));
+        }
+
         return res.status(200).json({
             success: true,
-            data: problems,
+            data: problemsWithStatus,
         });
     } catch (error) {
         console.error('Get problems error:', error);

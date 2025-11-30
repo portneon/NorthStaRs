@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { getCurrentUser } from '../utils/api';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
 
@@ -15,19 +15,18 @@ export default function ArenaPage() {
 
     const fetchProblems = async () => {
         try {
+            const user = getCurrentUser();
+            const userId = user ? user.id : '';
+
             // Using fetch instead of axios to ensure it works in preview if axios fails
-            const response = await fetch(`${API_BASE_URL}/code/problems`);
+            const response = await fetch(`${API_BASE_URL}/code/problems?userId=${userId}`);
             const data = await response.json();
             if (data.success) {
                 setProblems(data.data);
             }
         } catch (err) {
             console.error('Failed to fetch problems:', err);
-            setProblems([
-                { id: '1', title: 'Binary Inversion', difficulty: 'intermediate' },
-                { id: '2', title: 'Two Sum Protocol', difficulty: 'beginner' },
-                { id: '3', title: 'Graph Traversal', difficulty: 'advanced' }
-            ]);
+            setProblems([]);
         } finally {
             setLoading(false);
         }
@@ -182,16 +181,27 @@ export default function ArenaPage() {
                                                     className="block group/mission border-b border-[#333333] last:border-0 hover:bg-[#0F0F0F] transition-all relative z-10"
                                                 >
                                                     <div className="flex items-center p-5 gap-5">
-                                                        <div className="flex flex-col items-center justify-center w-8 h-8 border border-[#333333] group-hover/mission:border-[#CCFF00] transition-colors bg-[#080808]">
-                                                            <span className="font-mono text-[10px] text-[#555555] group-hover/mission:text-[#CCFF00]">
-                                                                {(idx + 1).toString().padStart(2, '0')}
-                                                            </span>
+                                                        <div className={`flex flex-col items-center justify-center w-8 h-8 border transition-colors bg-[#080808] ${problem.isSolved ? 'border-[#CCFF00] text-[#CCFF00]' : 'border-[#333333] group-hover/mission:border-[#CCFF00] text-[#555555] group-hover/mission:text-[#CCFF00]'}`}>
+                                                            {problem.isSolved ? (
+                                                                <span className="text-xs">✓</span>
+                                                            ) : (
+                                                                <span className="font-mono text-[10px]">
+                                                                    {(idx + 1).toString().padStart(2, '0')}
+                                                                </span>
+                                                            )}
                                                         </div>
 
                                                         <div className="flex-1">
-                                                            <h3 className="text-sm font-bold text-white group-hover/mission:text-[#CCFF00] uppercase tracking-wide transition-colors mb-1">
-                                                                {problem.title}
-                                                            </h3>
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <h3 className={`text-sm font-bold uppercase tracking-wide transition-colors ${problem.isSolved ? 'text-[#CCFF00] line-through decoration-[#CCFF00]/50' : 'text-white group-hover/mission:text-[#CCFF00]'}`}>
+                                                                    {problem.title}
+                                                                </h3>
+                                                                {problem.isSolved && (
+                                                                    <span className="text-[9px] bg-[#CCFF00]/10 text-[#CCFF00] px-1 border border-[#CCFF00]/30">
+                                                                        COMPLETED
+                                                                    </span>
+                                                                )}
+                                                            </div>
                                                             <span className={`text-[9px] uppercase tracking-widest ${difficulty === 'beginner' ? 'text-emerald-500/70' :
                                                                 difficulty === 'intermediate' ? 'text-yellow-500/70' : 'text-red-500/70'
                                                                 }`}>
