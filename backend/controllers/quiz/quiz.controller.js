@@ -2,10 +2,10 @@ const prisma = require('../../prisma/prisma');
 
 exports.getAllQuizzes = async (req, res) => {
   try {
+    console.log('getAllQuizzes called');
     const quizzes = await prisma.quiz.findMany({
       include: {
         topic: true,
-        course: true,
         questions: {
           include: {
             options: true
@@ -13,10 +13,11 @@ exports.getAllQuizzes = async (req, res) => {
         }
       }
     });
+    console.log('Successfully fetched quizzes:', quizzes.length);
     res.json(quizzes);
   } catch (error) {
     console.error('Get quizzes error:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 
@@ -27,7 +28,6 @@ exports.getQuizById = async (req, res) => {
       where: { id },
       include: {
         topic: true,
-        course: true,
         questions: {
           include: {
             options: true
@@ -35,11 +35,11 @@ exports.getQuizById = async (req, res) => {
         }
       }
     });
-    
+
     if (!quiz) {
       return res.status(404).json({ message: 'Quiz not found' });
     }
-    
+
     res.json(quiz);
   } catch (error) {
     console.error('Get quiz error:', error);
@@ -51,7 +51,7 @@ exports.submitQuizAttempt = async (req, res) => {
   try {
     const { quizId, answers, timeTaken } = req.body;
     const userId = req.user.id;
-    
+
     const quiz = await prisma.quiz.findUnique({
       where: { id: quizId },
       include: {
@@ -62,27 +62,27 @@ exports.submitQuizAttempt = async (req, res) => {
         }
       }
     });
-    
+
     if (!quiz) {
       return res.status(404).json({ message: 'Quiz not found' });
     }
-    
+
     let score = 0;
     const userAnswers = [];
-    
+
     for (const answer of answers) {
       const question = quiz.questions.find(q => q.id === answer.questionId);
       const isCorrect = question.correctOptionId === answer.optionId;
-      
+
       if (isCorrect) score++;
-      
+
       userAnswers.push({
         questionId: answer.questionId,
         optionId: answer.optionId,
         isCorrect
       });
     }
-    
+
     const attempt = await prisma.attempt.create({
       data: {
         userId,
@@ -97,7 +97,7 @@ exports.submitQuizAttempt = async (req, res) => {
         }
       }
     });
-    
+
     // update user xp
     const xpGained = score * 10;
     await prisma.user.update({
@@ -106,7 +106,7 @@ exports.submitQuizAttempt = async (req, res) => {
         xp: { increment: xpGained }
       }
     });
-    
+
     res.json({
       message: 'Quiz submitted successfully',
       score,
