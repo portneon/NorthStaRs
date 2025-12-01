@@ -10,9 +10,9 @@ const CompletionModal = ({ onClose }) => {
 
                 <div className="bg-[#080808] p-8 relative z-10 flex flex-col items-center text-center">
 
-                    {/* Icon */}
+                   
                     <div className="w-16 h-16 border border-[#CCFF00] flex items-center justify-center bg-[#CCFF00]/10 mb-6 rounded-full animate-pulse">
-                        <span className="text-3xl">✅</span>
+                        
                     </div>
 
                     <h2 className="text-[#CCFF00] text-2xl font-bold uppercase tracking-widest mb-2">

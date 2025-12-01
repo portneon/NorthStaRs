@@ -30,7 +30,7 @@ export default function HomePage() {
           setIsAuthenticated(true);
 
           try {
-            // Fetch all user data in parallel
+       
             const [userStats, leaderboardData, userModules, userAchievements] = await Promise.all([
               getUserStats(currentUser.id).catch(e => ({})),
               getLeaderboard().catch(e => []),

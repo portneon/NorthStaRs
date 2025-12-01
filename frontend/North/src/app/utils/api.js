@@ -1,12 +1,43 @@
-const API_BASE_URL = 'http://localhost:3005';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3005';
+
+const handleUnauthorized = () => {
+  // Clear local auth state on 401
+  try {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    window.dispatchEvent(new Event('auth-change'));
+  } catch (e) {
+    // ignore (server-side or restricted env)
+  }
+};
+
+async function fetchWithAuth(path, options = {}) {
+  const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+
+  const headers = {
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  const resp = await fetch(url, { ...options, headers, credentials: 'include' });
+
+  if (resp.status === 401) {
+    handleUnauthorized();
+    const payload = await resp.json().catch(() => ({}));
+    const err = new Error(payload.message || 'UNAUTHORIZED');
+    err.code = 'UNAUTHORIZED';
+    throw err;
+  }
+
+  return resp;
+}
 
 
 // LEADERBOARD API
 
 export async function getLeaderboard() {
-  const res = await fetch(`${API_BASE_URL}/leaderboard`, {
-    cache: 'no-store',
-  });
+  const res = await fetchWithAuth('/leaderboard', { cache: 'no-store' });
 
   if (!res.ok) {
     throw new Error('Failed to fetch leaderboard');
@@ -94,18 +125,9 @@ export const getCurrentUser = () => {
 
 export const getUserProfile = async (userId) => {
   try {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/profile/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
+    const response = await fetchWithAuth(`/user/profile/${userId}`);
     const data = await response.json();
-    if (!response.ok) {
-      throw new Error(data.message || 'Failed to fetch user profile');
-    }
-
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch user profile');
     return data;
   } catch (error) {
     throw error;
@@ -114,17 +136,8 @@ export const getUserProfile = async (userId) => {
 
 export const getUserModules = async (userId) => {
   try {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/${userId}/modules`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      return [];
-    }
-
+    const response = await fetchWithAuth(`/user/${userId}/modules`);
+    if (!response.ok) return [];
     const data = await response.json();
     return data.modules;
   } catch (error) {
@@ -135,17 +148,8 @@ export const getUserModules = async (userId) => {
 
 export const getUserStats = async (userId) => {
   try {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/user/stats/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch user stats');
-    }
-
+    const response = await fetchWithAuth(`/user/stats/${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch user stats');
     return response.json();
   } catch (error) {
     console.error('Failed to fetch user stats:', error);
@@ -155,17 +159,8 @@ export const getUserStats = async (userId) => {
 
 export const getUserAchievements = async (userId) => {
   try {
-    const token = getAuthToken();
-    const response = await fetch(`${API_BASE_URL}/achievement/${userId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch user achievements');
-    }
-
+    const response = await fetchWithAuth(`/achievement/${userId}`);
+    if (!response.ok) throw new Error('Failed to fetch user achievements');
     return response.json();
   } catch (error) {
     return [];
@@ -177,7 +172,7 @@ export const getUserAchievements = async (userId) => {
 
 export const getProblems = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/code/problems`);
+    const response = await fetchWithAuth('/code/problems');
     const data = await response.json();
 
     if (data.success) {
@@ -192,7 +187,7 @@ export const getProblems = async () => {
 
 export const getProblemById = async (problemId) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/code/problems/${problemId}`);
+    const response = await fetchWithAuth(`/code/problems/${problemId}`);
     const data = await response.json();
 
     if (data.success) {
