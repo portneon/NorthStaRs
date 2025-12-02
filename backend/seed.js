@@ -636,8 +636,8 @@ if __name__ == "__main__":
     console.log("Simulating quiz attempt for Bob...");
 
     // Refetch quiz data to ensure we have the updated correctOptionIds
-    const quizToAttempt = await prisma.quiz.findUnique({
-        where: { id: quiz1.id },
+    const quizToAttempt = await prisma.quiz.findFirst({
+        where: { title: "JS Variables Quiz" },
         include: { questions: { include: { options: true } } },
     });
 
