@@ -10,6 +10,8 @@ import { noirTheme, noirSyntax } from '../themes/noir-theme';
 /**
  * CodeEditor Component
  * CodeMirror 6 wrapper with NOIR theme
+ * 
+ * 
  */
 const CodeEditor = ({ value,
     onChange,
