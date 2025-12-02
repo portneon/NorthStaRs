@@ -32,23 +32,23 @@ model User {
   @@map("users")
 }
 
-model Teacher {
-  id          String   @id @default(uuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  // employeeId  String?  @unique
-  displayName String?
-  bio         String?  @db.Text
-  expertise   Json?
-  isActive    Boolean  @default(true)
+// model Teacher {
+//   id          String   @id @default(uuid())
+//   userId      String   @unique
+//   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   // employeeId  String?  @unique
+//   displayName String?
+//   bio         String?  @db.Text
+//   expertise   Json?
+//   isActive    Boolean  @default(true)
 
-  courses     Course[]
+//   courses     Course[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
 
   
-}
+// }
 
 
 model Achievement {
