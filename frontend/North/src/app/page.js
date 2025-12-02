@@ -4,9 +4,12 @@ import Hero from '@/components/Hero';
 import Stats from '@/components/Stats';
 import ModuleCard from '@/components/ModuleCard';
 import IntroPage from '@/components/IntroPage';
-import { getUserStats, getLeaderboard, getCurrentUser, getUserModules, getUserAchievements } from '@/app/utils/api';
+import { getUserStats, getLeaderboard, getCurrentUser, getUserModules, getUserAchievements, getProblems } from '@/app/utils/api';
+
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
+  const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [stats, setStats] = useState({
     totalHours: '0.0',
@@ -21,6 +24,8 @@ export default function HomePage() {
   const [achievements, setAchievements] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [dailyProblem, setDailyProblem] = useState(null);
+
   useEffect(() => {
     const checkAuthAndFetchData = async () => {
       try {
@@ -30,7 +35,12 @@ export default function HomePage() {
           setIsAuthenticated(true);
 
           try {
-       
+            // Fetch problems to find a daily challenge
+            const problems = await getProblems().catch(e => []);
+            // Try to find "Binary Inversion" or pick the first one
+            const daily = problems.find(p => p.title === 'Binary Inversion') || problems[0];
+            setDailyProblem(daily);
+
             const [userStats, leaderboardData, userModules, userAchievements] = await Promise.all([
               getUserStats(currentUser.id).catch(e => ({})),
               getLeaderboard().catch(e => []),
@@ -55,7 +65,6 @@ export default function HomePage() {
             setAchievements(userAchievements || []);
           } catch (dataError) {
             console.error('Error fetching user dashboard data:', dataError);
-            // Don't log out user just because data fetch failed
           }
         } else {
           setIsAuthenticated(false);
@@ -95,7 +104,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="w-full max-w-[1920px] mx-auto border-x border-zinc-800">
+    <div className="w-full max-w-[1920px] mx-auto border-x border-zinc-800 bg-zinc-950">
       <Hero
         streak={stats.streak}
         xpGoal={stats.xpGoal}
@@ -174,21 +183,35 @@ export default function HomePage() {
             <ModuleCard
               key={module.id || idx}
               span={idx === 0 ? "col-span-12 md:col-span-8 lg:col-span-6" :
-                idx === 1 ? "col-span-12 md:col-span-4 lg:col-span-3" :
+                idx === 1 ? "col-span-12 md:col-span-4 lg:col-span-3 bg-zinc-950 " :
                   "col-span-12 md:col-span-6 lg:col-span-3"}
               title={module.title}
               sub={module.subTitle}
               progress={module.progress}
+              onClick={() => {
+                if (module.type === 'quiz') {
+                  router.push(`/quiz/${module.id}`);
+                } else {
+                  router.push(`/module/${module.id}`);
+                }
+              }}
             />
           ))
         ) : (
-          <div className="col-span-12 p-8 text-center font-mono text-zinc-500">
+          <div className="col-span-12 p-8 text-center font-mono text-zinc-500 bg-zinc-950">
             NO_ACTIVE_MODULES
           </div>
         )}
-        <div className="col-span-12 md:col-span-6 lg:col-span-9 bg-zinc-950 border-r border-b border-zinc-800 p-8 flex flex-col md:flex-row items-center justify-between gap-8 group hover:bg-zinc-900 transition-colors cursor-pointer">
+
+        {/* Daily Challenge Section */}
+        <div
+          onClick={() => dailyProblem && router.push(`/code-editor?problemId=${dailyProblem.id}`)}
+          className="col-span-12 md:col-span-6 lg:col-span-9 bg-zinc-950 border-r border-b border-zinc-800 p-8 flex flex-col md:flex-row items-center justify-between gap-8 group hover:bg-zinc-900 transition-colors cursor-pointer"
+        >
           <div>
-            <h3 className="font-sans font-bold text-xl md:text-2xl text-white uppercase mb-2">Daily Challenge: <span className="text-lime-400">Binary Inversion</span></h3>
+            <h3 className="font-sans font-bold text-xl md:text-2xl text-white uppercase mb-2">
+              Daily Challenge: <span className="text-lime-400">{dailyProblem ? dailyProblem.title : 'LOADING...'}</span>
+            </h3>
             <p className="font-mono text-xs text-zinc-500 max-w-md">Complete the daily challenge to maintain your streak and earn a 2x XP multiplier.</p>
           </div>
           <div className="w-12 h-12 border border-lime-400 flex items-center justify-center rounded-none group-hover:bg-lime-400 group-hover:text-black transition-all shrink-0">

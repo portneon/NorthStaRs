@@ -267,6 +267,8 @@ const submitCode = async (req, res) => {
 
         // Award XP if all tests passed
         let xpAwarded = 0;
+        let newLevel = null; // Initialize newLevel
+
         if (testResults.allPassed) {
             // Check if already completed
             const existingProgress = await prisma.problemProgress.findUnique({
@@ -284,10 +286,11 @@ const submitCode = async (req, res) => {
                 // Calculate new level
                 const user = await prisma.user.findUnique({
                     where: { id: userId },
-                    select: { xp: true }
+                    select: { xp: true, level: true }
                 });
 
                 const currentXP = user.xp;
+                newLevel = user.level; // Default to current level
 
                 // Calculate XP based on difficulty
                 const difficultyXP = {
@@ -301,7 +304,11 @@ const submitCode = async (req, res) => {
                 xpAwarded = difficultyXP[problem.difficulty] || 50;
 
                 const newXP = currentXP + xpAwarded;
-                const newLevel = Math.floor(Math.sqrt(newXP / 50)) + 1;
+                const calculatedLevel = Math.floor(Math.sqrt(newXP / 50)) + 1;
+
+                if (calculatedLevel > newLevel) {
+                    newLevel = calculatedLevel;
+                }
 
                 await prisma.user.update({
                     where: { id: userId },
@@ -323,6 +330,13 @@ const submitCode = async (req, res) => {
                         totalXP: newXP,
                     },
                 });
+            } else {
+                // If not first completion, fetch current level for achievement check
+                const user = await prisma.user.findUnique({
+                    where: { id: userId },
+                    select: { level: true }
+                });
+                newLevel = user.level;
             }
 
             // Update problem progress
@@ -358,8 +372,10 @@ const submitCode = async (req, res) => {
         let newAchievements = [];
 
         // Check for LEVEL_UP achievements
-        const levelAchievements = await checkAchievements(userId, 'LEVEL_UP', { level: newLevel });
-        newAchievements = [...newAchievements, ...levelAchievements];
+        if (newLevel) {
+            const levelAchievements = await checkAchievements(userId, 'LEVEL_UP', { level: newLevel });
+            newAchievements = [...newAchievements, ...levelAchievements];
+        }
 
         // Check for QUIZ_COMPLETED achievements (mapped to problem completion here for simplicity, or add new type)
         // For now, let's treat coding problems as "quizzes" for the sake of the existing achievement types

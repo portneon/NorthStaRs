@@ -88,16 +88,16 @@ export default function CodeEditorPage() {
                 setSelectedProblem(problem);
 
                 if (problem.starterCode) {
+                    let starter = '// Code goes here';
                     try {
-                        const starterCodeObj = typeof problem.starterCode === 'string'
-                            ? JSON.parse(problem.starterCode)
-                            : problem.starterCode;
-
-                        const starter = starterCodeObj[language] || starterCodeObj.javascript || '// Code goes here';
-                        setCode(starter);
+                        // Try to parse as JSON object (multi-language support)
+                        const starterCodeObj = JSON.parse(problem.starterCode);
+                        starter = starterCodeObj[language] || starterCodeObj.javascript || starterCodeObj;
                     } catch (e) {
-                        console.error("Error parsing starter code");
+                        // If parsing fails, assume it's a plain string (legacy/single language)
+                        starter = problem.starterCode;
                     }
+                    setCode(starter);
                 } else {
                     setCode('// Write your solution here...');
                 }
@@ -212,34 +212,34 @@ export default function CodeEditorPage() {
                 const data = response.data.data;
                 setTestResults(data.testResults || null);
 
-                // Show XP notification if XP was awarded
-                if (data.xpAwarded > 0) {
+                // Only show success feedback if ALL tests passed
+                if (data.testResults && data.testResults.allPassed) {
+                    // Show XP notification
                     const user = getCurrentUser();
-                    // We need to fetch the updated user to get the new level
-                    // For now, we can just increment locally or fetch user again
-                    // Let's just show the XP gained
                     setXpNotification({
-                        xp: data.xpAwarded,
-                        level: null // We could pass new level if backend returned it
+                        xp: data.xpAwarded || 0,
+                        level: null
                     });
-                }
 
-                // Show Achievement notification if any
-                if (data.newAchievements && data.newAchievements.length > 0) {
-                    // Show the first one for now, or queue them
-                    setNewAchievement(data.newAchievements[0]);
-                }
+                    // Show Achievement notification if any
+                    if (data.newAchievements && data.newAchievements.length > 0) {
+                        setNewAchievement(data.newAchievements[0]);
+                    }
 
-                if (data.gridResult) {
+                    if (data.gridResult) {
+                        setGridResult(data.gridResult);
+                    } else {
+                        // For standard problems, show completion modal after 5 seconds
+                        setTimeout(() => {
+                            setShowCompletionModal(true);
+                        }, 5000);
+                    }
+                } else if (data.gridResult) {
+                    // For grid problems, we might want to show the grid even on failure to show the path
                     setGridResult(data.gridResult);
-                } else {
-                    // For standard problems, show completion modal after 5 seconds
-                    setTimeout(() => {
-                        setShowCompletionModal(true);
-                    }, 5000);
                 }
 
-                setOutput(response.data.message || 'SUBMISSION_LOGGED');
+                setOutput(''); // Clear generic message to let Test Results take focus
                 setStatus('success');
             } else {
                 setError(response.data.message || 'SUBMISSION_REJECTED');
@@ -285,19 +285,21 @@ export default function CodeEditorPage() {
             <div className="border-b border-[#333333] p-4 bg-[#080808]">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-6">
-                        <Link
-                            href="/arena"
-                            className="group flex items-center gap-2 text-xs uppercase tracking-widest text-[#B8B8B8] hover:text-[#CCFF00] transition-colors border border-[#333333] px-3 py-2 bg-transparent"
-                        >
-                            <span className="text-[#CCFF00] group-hover:-translate-x-1 transition-transform">←</span>
-                            Return_Arena
-                        </Link>
+                        {(!testResults || testResults.allPassed) && (
+                            <Link
+                                href="/arena"
+                                className="group flex items-center gap-2 text-xs uppercase tracking-widest text-[#B8B8B8] hover:text-[#CCFF00] transition-colors border border-[#333333] px-3 py-2 bg-transparent"
+                            >
+                                <span className="text-[#CCFF00] group-hover:-translate-x-1 transition-transform">←</span>
+                                Return_Arena
+                            </Link>
+                        )}
 
                         <div className="h-8 w-[1px] bg-[#333333]"></div>
 
                         <div>
                             <span className="block text-[#CCFF00] text-[10px] tracking-[0.2em] mb-1">
-                                /// ACTIVE_PROTOCOL
+                                {'/// ACTIVE_PROTOCOL'}
                             </span>
                             {loadingProblem ? (
                                 <h1 className="text-xl font-bold uppercase tracking-tight leading-none text-[#555555] animate-pulse">
@@ -370,7 +372,7 @@ export default function CodeEditorPage() {
                         <div className="mb-8">
                             <div className="flex items-center justify-between border-b border-[#333333] pb-2 mb-4">
                                 <div className="text-[#CCFF00] text-xs tracking-widest">
-                                    /// MISSION_BRIEFING
+                                    {'/// MISSION_BRIEFING'}
                                 </div>
                                 {selectedProblem && (
                                     <span className={`text-[10px] font-bold uppercase px-2 py-1 border border-[#333333] ${selectedProblem.difficulty?.toLowerCase() === 'beginner' ? 'text-[#CCFF00]' :
@@ -393,7 +395,7 @@ export default function CodeEditorPage() {
                                     {selectedProblem.instructions && (
                                         <div>
                                             <div className="text-[#555555] text-[10px] uppercase tracking-widest mb-2">
-                                                /// OBJECTIVES
+                                                {'/// OBJECTIVES'}
                                             </div>
                                             <p className="text-xs text-[#999999] leading-relaxed whitespace-pre-wrap font-mono border-l-2 border-[#333333] pl-3">
                                                 {selectedProblem.instructions}
@@ -408,7 +410,7 @@ export default function CodeEditorPage() {
                                                 onClick={() => !showHints && setShowHintConfirmation(true)}
                                                 className={`text-[10px] uppercase tracking-widest mb-2 flex items-center justify-between cursor-pointer group ${showHints ? 'text-[#CCFF00]' : 'text-[#555555] hover:text-[#B8B8B8]'}`}
                                             >
-                                                <span>/// TACTICAL_INTEL {showHints ? '[DECRYPTED]' : '[ENCRYPTED]'}</span>
+                                                <span>{'/// TACTICAL_INTEL'} {showHints ? '[DECRYPTED]' : '[ENCRYPTED]'}</span>
                                                 {!showHints && <span className="text-[8px] border border-[#333] px-1 group-hover:border-[#555]">CLICK_TO_DECRYPT</span>}
                                             </div>
 
@@ -437,7 +439,7 @@ export default function CodeEditorPage() {
                         {/* Language Selector */}
                         <div className="mb-8">
                             <div className="text-[#CCFF00] text-xs tracking-widest mb-4 border-b border-[#333333] pb-2">
-                                /// RUNTIME_ENV
+                                {'/// RUNTIME_ENV'}
                             </div>
                             <LanguageSelector
                                 value={language}
@@ -453,7 +455,7 @@ export default function CodeEditorPage() {
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
                         <div className="bg-[#0a0a0a] border border-[#CCFF00] p-6 max-w-sm w-full shadow-[0_0_30px_rgba(204,255,0,0.1)] relative">
                             <div className="text-[#CCFF00] text-xs tracking-widest mb-4 border-b border-[#333333] pb-2">
-                                /// SECURITY_PROTOCOL
+                                {'/// SECURITY_PROTOCOL'}
                             </div>
                             <p className="text-sm text-[#B8B8B8] mb-6 font-mono">
                                 Decrypting tactical intel may reduce mission rating. Are you sure you want to proceed?
@@ -483,7 +485,7 @@ export default function CodeEditorPage() {
                 <div className="col-span-12 lg:col-span-5 border-r border-[#333333] flex flex-col bg-[#080808] min-h-[500px]">
                     <div className="border-b border-[#333333] p-2 flex justify-between items-center bg-[#0a0a0a]">
                         <span className="text-[#555555] text-[10px] uppercase tracking-widest px-4">
-                            /// SOURCE_CODE_EDITOR
+                            {'/// SOURCE_CODE_EDITOR'}
                         </span>
                         <div className="flex gap-2 px-2">
                             <div className="w-2 h-2 bg-[#333333]"></div>
@@ -514,7 +516,7 @@ export default function CodeEditorPage() {
                 <div className="col-span-12 lg:col-span-4 flex flex-col bg-[#080808]">
                     <div className="border-b border-[#333333] p-2 bg-[#0a0a0a]">
                         <span className="text-[#555555] text-[10px] uppercase tracking-widest px-4">
-                            /// SYSTEM_OUTPUT
+                            {'/// SYSTEM_OUTPUT'}
                         </span>
                     </div>
 
@@ -534,7 +536,7 @@ export default function CodeEditorPage() {
                                 <div className="border-t border-[#333333] p-6 bg-[#0a0a0a]">
                                     <div className="text-[#CCFF00] text-xs tracking-widest mb-4 flex items-center gap-2">
                                         <div className="w-2 h-2 bg-[#CCFF00] rounded-full animate-pulse"></div>
-                                        /// VISUAL_FEED
+                                        {'/// VISUAL_FEED'}
                                     </div>
                                     <GridVisualizer
                                         gridSize={gridResult.gridSize}

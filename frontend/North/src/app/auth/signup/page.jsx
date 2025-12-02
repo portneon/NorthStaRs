@@ -126,7 +126,7 @@ export default function SignupView() {
                 </button>
 
                 <p className="text-center font-mono text-[10px] text-zinc-600 mt-4">
-                    By initializing, you agree to the <Link href="#" className="underline hover:text-lime-400">Grid_Protocols</Link>.
+                    By initializing, you agree to the <Link href="/terms" className="underline hover:text-lime-400">Grid_Protocols</Link>.
                 </p>
 
                 <p className="text-center font-mono text-xs text-zinc-600 mt-4">

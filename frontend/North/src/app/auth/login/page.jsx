@@ -89,7 +89,7 @@ export default function LoginView() {
                         />
                         <span className="font-mono text-xs text-zinc-500 uppercase">Keep_Session_Alive</span>
                     </label>
-                    <Link href="#" className="font-mono text-xs text-zinc-500 hover:text-lime-400 uppercase border-b border-transparent hover:border-lime-400 transition-all">
+                    <Link href="/auth/forgot-password" className="font-mono text-xs text-zinc-500 hover:text-lime-400 uppercase border-b border-transparent hover:border-lime-400 transition-all">
                         Lost_Key?
                     </Link>
                 </div>

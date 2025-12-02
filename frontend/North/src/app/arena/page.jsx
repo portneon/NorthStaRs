@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getCurrentUser, getQuizzes } from "../utils/api";
+import QuizCard from "@/components/QuizCard";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3005";
 
@@ -92,15 +93,15 @@ export default function ArenaPage() {
   };
 
   const levels = {
-    beginner: problems.filter((p) => p.difficulty === "beginner"),
-    intermediate: problems.filter((p) => p.difficulty === "intermediate"),
-    advanced: problems.filter((p) => p.difficulty === "advanced"),
+    beginner: problems.filter((p) => ["beginner", "easy"].includes(p.difficulty.toLowerCase())),
+    intermediate: problems.filter((p) => ["intermediate", "medium"].includes(p.difficulty.toLowerCase())),
+    advanced: problems.filter((p) => ["advanced", "hard"].includes(p.difficulty.toLowerCase())),
   };
 
   const quizLevels = {
-    beginner: quizzes.filter((q) => q.difficulty === "beginner"),
-    intermediate: quizzes.filter((q) => q.difficulty === "intermediate"),
-    advanced: quizzes.filter((q) => q.difficulty === "advanced"),
+    beginner: quizzes.filter((q) => q.difficulty === "easy"),
+    intermediate: quizzes.filter((q) => q.difficulty === "medium"),
+    advanced: quizzes.filter((q) => q.difficulty === "hard"),
   };
 
   const levelConfig = {
@@ -195,16 +196,14 @@ export default function ArenaPage() {
                   className={`
                                         col-span-12 lg:col-span-4 border-b lg:border-b-0 lg:border-r border-[#333333] 
                                         relative group transition-all duration-300 flex flex-col
-                                        ${
-                                          isSelected
-                                            ? "bg-[#0a0a0a]"
-                                            : "bg-[#080808] hover:bg-[#0c0c0c]"
-                                        }
-                                        ${
-                                          isLocked
-                                            ? "opacity-50 grayscale pointer-events-none"
-                                            : "cursor-pointer"
-                                        }
+                                        ${isSelected
+                      ? "bg-[#0a0a0a]"
+                      : "bg-[#080808] hover:bg-[#0c0c0c]"
+                    }
+                                        ${isLocked
+                      ? "opacity-50 grayscale pointer-events-none"
+                      : "cursor-pointer"
+                    }
                                     `}
                   onClick={() =>
                     !isLocked &&
@@ -224,11 +223,10 @@ export default function ArenaPage() {
 
                     <div className="flex justify-between items-start mb-12 relative z-10">
                       <span
-                        className={`text-[10px] uppercase tracking-[0.2em] border px-2 py-1 ${
-                          isSelected
-                            ? "border-[#CCFF00] text-[#CCFF00]"
-                            : "border-[#333333] text-[#555555]"
-                        }`}
+                        className={`text-[10px] uppercase tracking-[0.2em] border px-2 py-1 ${isSelected
+                          ? "border-[#CCFF00] text-[#CCFF00]"
+                          : "border-[#333333] text-[#555555]"
+                          }`}
                       >
                         {config.id}
                       </span>
@@ -238,11 +236,10 @@ export default function ArenaPage() {
                     </div>
 
                     <h2
-                      className={`relative z-10 text-4xl md:text-5xl font-bold uppercase tracking-tighter mb-4 ${
-                        isSelected
-                          ? "text-white"
-                          : "text-[#888] group-hover:text-white"
-                      }`}
+                      className={`relative z-10 text-4xl md:text-5xl font-bold uppercase tracking-tighter mb-4 ${isSelected
+                        ? "text-white"
+                        : "text-[#888] group-hover:text-white"
+                        }`}
                     >
                       {config.name}
                     </h2>
@@ -258,24 +255,21 @@ export default function ArenaPage() {
                       </div>
                       <div className="w-full h-[2px] bg-[#1a1a1a]">
                         <div
-                          className={`h-full transition-all duration-500 ${
-                            isLocked
-                              ? "w-0 bg-[#333333]"
-                              : `bg-[#CCFF00] ${
-                                  isSelected
-                                    ? "w-full"
-                                    : "w-1/3 group-hover:w-2/3"
-                                }`
-                          }`}
+                          className={`h-full transition-all duration-500 ${isLocked
+                            ? "w-0 bg-[#333333]"
+                            : `bg-[#CCFF00] ${isSelected
+                              ? "w-full"
+                              : "w-1/3 group-hover:w-2/3"
+                            }`
+                            }`}
                         ></div>
                       </div>
                     </div>
                   </div>
 
                   <div
-                    className={`overflow-hidden transition-[max-height] duration-500 ease-in-out ${
-                      isSelected ? "max-h-[800px]" : "max-h-0"
-                    }`}
+                    className={`overflow-hidden transition-[max-height] duration-500 ease-in-out ${isSelected ? "max-h-[800px]" : "max-h-0"
+                      }`}
                   >
                     <div className="bg-[#050505] relative">
                       <div className="absolute inset-0 opacity-10 bg-[linear-gradient(#555_1px,transparent_1px),linear-gradient(90deg,#555_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none"></div>
@@ -296,11 +290,10 @@ export default function ArenaPage() {
                         >
                           <div className="flex items-center p-5 gap-5">
                             <div
-                              className={`flex flex-col items-center justify-center w-8 h-8 border transition-colors bg-[#080808] ${
-                                problem.isSolved
-                                  ? "border-[#CCFF00] text-[#CCFF00]"
-                                  : "border-[#333333] group-hover/mission:border-[#CCFF00] text-[#555555] group-hover/mission:text-[#CCFF00]"
-                              }`}
+                              className={`flex flex-col items-center justify-center w-8 h-8 border transition-colors bg-[#080808] ${problem.isSolved
+                                ? "border-[#CCFF00] text-[#CCFF00]"
+                                : "border-[#333333] group-hover/mission:border-[#CCFF00] text-[#555555] group-hover/mission:text-[#CCFF00]"
+                                }`}
                             >
                               {problem.isSolved ? (
                                 <span className="text-xs">✓</span>
@@ -314,11 +307,10 @@ export default function ArenaPage() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
                                 <h3
-                                  className={`text-sm font-bold uppercase tracking-wide transition-colors ${
-                                    problem.isSolved
-                                      ? "text-[#CCFF00] line-through decoration-[#CCFF00]/50"
-                                      : "text-white group-hover/mission:text-[#CCFF00]"
-                                  }`}
+                                  className={`text-sm font-bold uppercase tracking-wide transition-colors ${problem.isSolved
+                                    ? "text-[#CCFF00] line-through decoration-[#CCFF00]/50"
+                                    : "text-white group-hover/mission:text-[#CCFF00]"
+                                    }`}
                                 >
                                   {problem.title}
                                 </h3>
@@ -329,13 +321,12 @@ export default function ArenaPage() {
                                 )}
                               </div>
                               <span
-                                className={`text-[9px] uppercase tracking-widest ${
-                                  difficulty === "beginner"
-                                    ? "text-emerald-500/70"
-                                    : difficulty === "intermediate"
+                                className={`text-[9px] uppercase tracking-widest ${difficulty === "beginner"
+                                  ? "text-emerald-500/70"
+                                  : difficulty === "intermediate"
                                     ? "text-yellow-500/70"
                                     : "text-red-500/70"
-                                }`}
+                                  }`}
                               >
                                 {/* difficulty label */}
                               </span>
@@ -348,47 +339,7 @@ export default function ArenaPage() {
                         </a>
                       ))}
 
-                      {/* Render quizzes for this level */}
-                      {quizzesForLevel.map((quiz, qidx) => (
-                        <a
-                          key={quiz.id}
-                          href={`/quiz/${quiz.id}`}
-                          className="block group/mission border-b border-[#333333] last:border-0 hover:bg-[#0F0F0F] transition-all relative z-10"
-                        >
-                          <div className="flex items-center p-5 gap-5">
-                            <div className="flex flex-col items-center justify-center w-8 h-8 border bg-[#080808] border-[#333333] text-[#555555] group-hover/mission:border-[#CCFF00] group-hover/mission:text-[#CCFF00]">
-                              <span className="font-mono text-[10px]">
-                                Q{(qidx + 1).toString().padStart(2, "0")}
-                              </span>
-                            </div>
 
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3
-                                  className={`text-sm font-bold uppercase tracking-wide transition-colors text-white group-hover/mission:text-[#CCFF00]`}
-                                >
-                                  {quiz.title}
-                                </h3>
-                              </div>
-                              <span
-                                className={`text-[9px] uppercase tracking-widest ${
-                                  difficulty === "beginner"
-                                    ? "text-emerald-500/70"
-                                    : difficulty === "intermediate"
-                                    ? "text-yellow-500/70"
-                                    : "text-red-500/70"
-                                }`}
-                              >
-                                {/* Quiz • {quiz.difficulty} */}
-                              </span>
-                            </div>
-
-                            <span className="text-[#333333] group-hover/mission:text-[#CCFF00] text-xs transition-transform group-hover/mission:translate-x-1 font-bold">
-                              [BATTLE]
-                            </span>
-                          </div>
-                        </a>
-                      ))}
                     </div>
                   </div>
 

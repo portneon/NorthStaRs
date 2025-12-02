@@ -11,7 +11,7 @@ const handleUnauthorized = () => {
   }
 };
 
-async function fetchWithAuth(path, options = {}) {
+export async function fetchWithAuth(path, options = {}) {
   const url = path.startsWith('http') ? path : `${API_BASE_URL}${path}`;
   const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 

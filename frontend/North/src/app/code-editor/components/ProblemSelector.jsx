@@ -27,11 +27,11 @@ export default function ProblemSelector({ problems, selectedProblem, onSelect, l
             {/* LABEL */}
             <div className="flex justify-between items-end mb-2 border-b border-[#333333] pb-1">
                 <span className="text-[#CCFF00] text-[10px] uppercase tracking-widest">
-                    /// MISSION_SELECT
+                    {'/// MISSION_SELECT'}
                 </span>
                 {selectedProblem && (
                     <span className={`text-[9px] font-bold uppercase ${selectedProblem.difficulty === 'beginner' ? 'text-[#CCFF00]' :
-                            selectedProblem.difficulty === 'intermediate' ? 'text-yellow-500' : 'text-[#FF3333]'
+                        selectedProblem.difficulty === 'intermediate' ? 'text-yellow-500' : 'text-[#FF3333]'
                         }`}>
                         [{selectedProblem.difficulty}]
                     </span>

@@ -18,7 +18,7 @@ const OutputPanel = ({ output, error, status, executionTime, testResults }) => {
             {/* Header */}
             <div className="bg-zinc-950 border-b border-zinc-800 p-3 flex items-center justify-between">
                 <span className="font-mono text-xs text-zinc-500 uppercase tracking-widest">
-          /// OUTPUT_TERMINAL
+                    {'/// OUTPUT_TERMINAL'}
                 </span>
                 {executionTime !== null && executionTime !== undefined && (
                     <span className="font-mono text-xs text-zinc-600">
@@ -31,7 +31,7 @@ const OutputPanel = ({ output, error, status, executionTime, testResults }) => {
             <div className="flex-1 bg-zinc-950 p-4 overflow-auto font-mono text-sm">
                 {!hasOutput && (
                     <div className="text-zinc-600 italic">
-            // Awaiting execution...
+                        {'// Awaiting execution...'}
                     </div>
                 )}
 
@@ -70,8 +70,8 @@ const OutputPanel = ({ output, error, status, executionTime, testResults }) => {
                             <div
                                 key={idx}
                                 className={`border-l-2 pl-3 py-2 ${result.passed
-                                        ? 'border-lime-400 bg-lime-400 bg-opacity-5'
-                                        : 'border-red-500 bg-red-500 bg-opacity-5'
+                                    ? 'border-lime-400 bg-lime-400 bg-opacity-5'
+                                    : 'border-red-500 bg-red-500 bg-opacity-5'
                                     }`}
                             >
                                 <div className="flex items-center gap-2 mb-1">
@@ -83,16 +83,16 @@ const OutputPanel = ({ output, error, status, executionTime, testResults }) => {
                                         TEST_CASE_{String(idx + 1).padStart(2, '0')}
                                     </span>
                                 </div>
-                                {!result.passed && (
-                                    <div className="text-xs mt-2 space-y-1">
-                                        <div className="text-zinc-600">
-                                            Expected: <span className="text-zinc-400">{result.expected}</span>
-                                        </div>
-                                        <div className="text-zinc-600">
-                                            Actual: <span className="text-red-400">{result.actual}</span>
-                                        </div>
+                                <div className="text-xs mt-2 space-y-1">
+                                    <div className="text-zinc-600">
+                                        Expected: <span className="text-zinc-400">{result.expected}</span>
                                     </div>
-                                )}
+                                    <div className="text-zinc-600">
+                                        Actual: <span className={result.passed ? "text-zinc-400" : "text-red-400"}>
+                                            {result.actual === "" ? <span className="italic opacity-50">No output</span> : result.actual}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -102,10 +102,10 @@ const OutputPanel = ({ output, error, status, executionTime, testResults }) => {
                 {status && (
                     <div className="mt-4 pt-3 border-t border-zinc-800">
                         <span className={`font-mono text-xs ${status === 'PASSED' || status === 'success'
-                                ? 'text-lime-400'
-                                : status === 'FAILED' || status === 'error'
-                                    ? 'text-red-500'
-                                    : 'text-zinc-500'
+                            ? 'text-lime-400'
+                            : status === 'FAILED' || status === 'error'
+                                ? 'text-red-500'
+                                : 'text-zinc-500'
                             }`}>
                             STATUS: {status.toUpperCase()}
                         </span>

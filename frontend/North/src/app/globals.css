@@ -16,6 +16,11 @@ html {
     scroll-behavior: smooth;
 }
 
+body {
+    background-color: var(--noir-void-black);
+    color: var(--noir-plaster-white);
+}
+
 /* Custom scrollbar for all elements */
 * {
     scrollbar-width: thin;

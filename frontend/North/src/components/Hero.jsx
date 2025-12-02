@@ -10,13 +10,14 @@ function Hero({ streak = 0, xpGoal = 0, username = '', level = 1 }) {
             {/* Intro Page / Main Text Area */}
             <div className="col-span-12 lg:col-span-8 p-6 md:p-12 lg:p-16 border-b lg:border-b-0 lg:border-r border-zinc-800 bg-zinc-950 flex flex-col justify-center min-h-[40vh] md:min-h-[50vh]">
                 <div className="flex items-center gap-3 mb-4">
-                    <span className="font-mono text-lime-400 text-[10px] md:text-xs tracking-widest">/// NEXUS_GRID_SYSTEM</span>
+                    <span className="font-mono text-lime-400 text-[10px] md:text-xs tracking-widest">{'/// NEXUS_GRID_SYSTEM'}</span>
                     <span className="font-mono text-zinc-500 text-[10px] md:text-xs tracking-widest">|</span>
                     <span className="font-mono text-zinc-500 text-[10px] md:text-xs tracking-widest">LVL_{String(level).padStart(2, '0')}</span>
                 </div>
 
-                <h1 className="font-sans font-bold text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-white leading-[0.9] tracking-tighter uppercase mb-8 break-words hyphens-auto">
-                    Welcome back,<br className="hidden md:block" /> {username}
+                <h1 className="font-sans font-bold text-white leading-[0.9] tracking-tighter uppercase mb-8 break-words hyphens-auto">
+                    <span className="block text-xl md:text-2xl lg:text-3xl text-zinc-400 mb-2">Welcome back,</span>
+                    <span className="block text-4xl md:text-6xl lg:text-7xl">{username}</span>
                 </h1>
 
                 <div className="flex flex-col sm:flex-row gap-4">

@@ -34,7 +34,7 @@ export default function IntroPage() {
                             We turned Data Structures & Algorithms into a high-stakes strategy game.
                             Write code, control the grid, and watch your skills actually deploy.
                             <br /><br />
-                            <span className="text-[#555555] text-xs">/// INITIALIZING_NEURAL_UPLINK...</span>
+                            <span className="text-[#555555] text-xs">{'/// INITIALIZING_NEURAL_UPLINK...'}</span>
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-6">
@@ -88,7 +88,7 @@ export default function IntroPage() {
                     <div className="h-32 bg-[#080808] relative overflow-hidden">
                         <div className="absolute inset-0 opacity-20 bg-[linear-gradient(#CCFF00_1px,transparent_1px),linear-gradient(90deg,#CCFF00_1px,transparent_1px)] bg-[size:20px_20px]"></div>
                         <div className="absolute bottom-0 left-0 p-4 font-mono text-[10px] text-[#333333]">
-                            /// GAME_ENGINE_ACTIVE
+                            {'/// GAME_ENGINE_ACTIVE'}
                         </div>
                     </div>
                 </div>
@@ -125,7 +125,7 @@ export default function IntroPage() {
                         Proof of Work
                     </h3>
                     <p className="text-[#888888] text-xs leading-relaxed">
-                        Your rank isn't just a number. It's a verified record of complex problems you've solved. Perfect for your portfolio.
+                        Your rank isn&apos;t just a number. It&apos;s a verified record of complex problems you&apos;ve solved. Perfect for your portfolio.
                     </p>
                 </div>
 

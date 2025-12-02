@@ -6,7 +6,7 @@ const AuthLayout = ({ title, subtitle, children, visualContent }) => (
             <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-lime-400"></div>
 
             <div className="mb-12">
-                <span className="font-mono text-lime-400 text-xs tracking-widest mb-2 block">/// SECURITY_GATEWAY_V1</span>
+                <span className="font-mono text-lime-400 text-xs tracking-widest mb-2 block">{'/// SECURITY_GATEWAY_V1'}</span>
                 <h1 className="font-sans font-bold text-5xl md:text-6xl text-white uppercase leading-[0.9] tracking-tighter mb-4">{title}</h1>
                 <p className="font-mono text-xs text-zinc-500 max-w-sm">{subtitle}</p>
             </div>

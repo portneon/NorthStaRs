@@ -15,33 +15,26 @@ export default function GridVisualizer({
 }) {
     const [currentStep, setCurrentStep] = useState(0);
     const [animating, setAnimating] = useState(false);
-    const [mismatchIndex, setMismatchIndex] = useState(-1);
     const [status, setStatus] = useState('ready'); // 'ready', 'animating', 'success', 'failed'
 
     const rows = gridSize?.rows || 5;
     const cols = gridSize?.cols || 5;
 
-    // Check if paths match
-    useEffect(() => {
-        if (!userPath || !expectedPath) return;
-
-        // Find first mismatch
+    // Calculate mismatch index directly (derived state)
+    let mismatchIndex = -1;
+    if (userPath && expectedPath) {
         for (let i = 0; i < expectedPath.length; i++) {
             if (i >= userPath.length ||
                 userPath[i][0] !== expectedPath[i][0] ||
                 userPath[i][1] !== expectedPath[i][1]) {
-                setMismatchIndex(i);
-                return;
+                mismatchIndex = i;
+                break;
             }
         }
-
-        // Check if user path is longer
-        if (userPath.length > expectedPath.length) {
-            setMismatchIndex(expectedPath.length);
-        } else {
-            setMismatchIndex(-1); // Paths match!
+        if (mismatchIndex === -1 && userPath.length > expectedPath.length) {
+            mismatchIndex = expectedPath.length;
         }
-    }, [userPath, expectedPath]);
+    }
 
     // Animation loop
     useEffect(() => {
@@ -49,23 +42,27 @@ export default function GridVisualizer({
 
         if (currentStep < userPath.length) {
             const timer = setTimeout(() => {
-                setCurrentStep(prev => prev + 1);
-
                 // Check if we reached a mismatch
                 if (currentStep + 1 === mismatchIndex) {
+                    setCurrentStep(prev => prev + 1);
                     setAnimating(false);
                     setStatus('failed');
+                } else if (currentStep + 1 >= userPath.length) {
+                    // End of path
+                    setCurrentStep(prev => prev + 1);
+                    setAnimating(false);
+                    const isSuccess = mismatchIndex === -1;
+                    setStatus(isSuccess ? 'success' : 'failed');
+                    if (isSuccess && onComplete) {
+                        setTimeout(onComplete, 1000);
+                    }
+                } else {
+                    // Continue animation
+                    setCurrentStep(prev => prev + 1);
                 }
-            }, 200); // Faster, snappier steps (200ms)
+            }, 200);
 
             return () => clearTimeout(timer);
-        } else {
-            setAnimating(false);
-            const isSuccess = mismatchIndex === -1;
-            setStatus(isSuccess ? 'success' : 'failed');
-            if (isSuccess && onComplete) {
-                setTimeout(onComplete, 1000); // Delay slightly to show success state
-            }
         }
     }, [currentStep, animating, userPath, mismatchIndex, onComplete]);
 
@@ -104,7 +101,7 @@ export default function GridVisualizer({
             <div className="flex justify-between items-end mb-8 border-b border-[#333333] pb-4">
                 <div>
                     <div className="text-[#CCFF00] text-[10px] tracking-[0.2em] mb-1">
-                        /// VISUAL_FEED
+                        {'/// VISUAL_FEED'}
                     </div>
                     <h3 className="text-[#F2F2F2] text-xl font-bold uppercase tracking-tight">
                         GRID_SIMULATION

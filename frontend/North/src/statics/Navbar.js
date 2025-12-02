@@ -5,7 +5,12 @@ import { useState, useEffect } from "react";
 import { getCurrentUser, logout } from "@/app/utils/api";
 
 function NavBar() {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => {
+        if (typeof window !== 'undefined') {
+            return getCurrentUser();
+        }
+        return null;
+    });
     const router = useRouter();
     const pathname = (usePathname() || "").toLowerCase();
 
@@ -17,10 +22,6 @@ function NavBar() {
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     useEffect(() => {
-        // Check for logged in user on mount
-        const currentUser = getCurrentUser();
-        setUser(currentUser);
-
         // Listen for storage events to update state across tabs/windows
         const handleStorageChange = () => {
             const updatedUser = getCurrentUser();

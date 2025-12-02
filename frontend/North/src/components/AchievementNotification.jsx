@@ -5,12 +5,20 @@ const AchievementNotification = ({ achievement, onClose }) => {
 
     useEffect(() => {
         if (achievement) {
-            setIsVisible(true);
-            const timer = setTimeout(() => {
+            // Use setTimeout to avoid synchronous state update during render phase
+            const enterTimer = setTimeout(() => {
+                setIsVisible(true);
+            }, 10);
+
+            const exitTimer = setTimeout(() => {
                 setIsVisible(false);
                 setTimeout(onClose, 500); // Wait for exit animation
             }, 5000);
-            return () => clearTimeout(timer);
+
+            return () => {
+                clearTimeout(enterTimer);
+                clearTimeout(exitTimer);
+            };
         }
     }, [achievement, onClose]);
 
@@ -32,7 +40,7 @@ const AchievementNotification = ({ achievement, onClose }) => {
                     <div className="flex-1">
                         <div className="flex justify-between items-start mb-1">
                             <span className="text-[10px] text-[#CCFF00] uppercase tracking-widest animate-pulse">
-                                /// ACHIEVEMENT_UNLOCKED
+                                {'/// ACHIEVEMENT_UNLOCKED'}
                             </span>
                             <span className="text-[10px] text-[#555555] font-mono">
                                 +{achievement.xpReward} XP
