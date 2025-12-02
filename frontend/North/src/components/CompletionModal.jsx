@@ -5,7 +5,7 @@ const CompletionModal = ({ onClose }) => {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-in fade-in duration-300">
             <div className="bg-[#0a0a0a] border border-[#CCFF00] p-1 shadow-[0_0_50px_rgba(204,255,0,0.2)] max-w-md w-full relative overflow-hidden group">
-                {/* Scanline effect */}
+      
                 <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.5)_50%)] bg-[size:100%_4px] pointer-events-none opacity-20"></div>
 
                 <div className="bg-[#080808] p-8 relative z-10 flex flex-col items-center text-center">
@@ -44,7 +44,7 @@ const CompletionModal = ({ onClose }) => {
                         </button>
                     </div>
 
-                    {/* Corner accents */}
+                   
                     <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#CCFF00]"></div>
                     <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#CCFF00]"></div>
                 </div>

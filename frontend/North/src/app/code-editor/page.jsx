@@ -44,6 +44,7 @@ export default function CodeEditorPage() {
     const [showHintConfirmation, setShowHintConfirmation] = useState(false);
     const [showCompletionModal, setShowCompletionModal] = useState(false);
     const [isSubmission, setIsSubmission] = useState(false);
+    const [usedInput, setUsedInput] = useState('');
 
     const fetchLanguages = async () => {
         try {
@@ -144,11 +145,19 @@ export default function CodeEditorPage() {
 
         try {
             const startTime = Date.now();
+
+            // Use first test case input if available
+            let inputToUse = '';
+            if (selectedProblem && selectedProblem.testCases && selectedProblem.testCases.length > 0) {
+                inputToUse = selectedProblem.testCases[0].input;
+            }
+            setUsedInput(inputToUse);
+
             const response = await axios.post(`${API_BASE_URL}/code/execute`, {
                 language,
                 version: languageVersion,
                 code,
-                stdin: '',
+                stdin: inputToUse,
                 problemId: selectedProblem?.id // Send problemId for grid validation
             });
 
@@ -430,6 +439,25 @@ export default function CodeEditorPage() {
                                             )}
                                         </div>
                                     )}
+
+                                    {/* Example Test Case */}
+                                    {selectedProblem.testCases && selectedProblem.testCases.length > 0 && (
+                                        <div className="mt-6 border-t border-[#333333] pt-4">
+                                            <div className="text-[#CCFF00] text-xs tracking-widest mb-2">
+                                                {'/// EXAMPLE_CASE'}
+                                            </div>
+                                            <div className="bg-[#0a0a0a] border border-[#333333] p-3 font-mono text-xs">
+                                                <div className="mb-2">
+                                                    <span className="text-[#555555] block mb-1">INPUT:</span>
+                                                    <span className="text-[#B8B8B8]">{selectedProblem.testCases[0].input}</span>
+                                                </div>
+                                                <div>
+                                                    <span className="text-[#555555] block mb-1">EXPECTED_OUTPUT:</span>
+                                                    <span className="text-[#CCFF00]">{selectedProblem.testCases[0].expected}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             ) : (
                                 <div className="text-sm text-[#555555] italic">Select a protocol from the Arena to begin...</div>
@@ -529,6 +557,7 @@ export default function CodeEditorPage() {
                                 status={status}
                                 executionTime={executionTime}
                                 testResults={testResults}
+                                usedInput={usedInput}
                             />
 
                             {/* Grid Visualizer (If active) */}

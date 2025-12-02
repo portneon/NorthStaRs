@@ -5,7 +5,7 @@ import React from 'react';
  * OutputPanel Component
  * Displays code execution output with NOIR design
  */
-const OutputPanel = ({ output, error, status, executionTime, testResults }) => {
+const OutputPanel = ({ output, error, status, executionTime, testResults, usedInput }) => {
     const hasOutput = output || error || testResults;
 
     // Glitch animation class for errors
@@ -32,6 +32,19 @@ const OutputPanel = ({ output, error, status, executionTime, testResults }) => {
                 {!hasOutput && (
                     <div className="text-zinc-600 italic">
                         {'// Awaiting execution...'}
+                    </div>
+                )}
+
+                {/* DEBUG INFO */}
+                <div className="text-xs text-red-500 border border-red-900 p-1 mb-2">
+                    DEBUG: Output Length: {output ? output.length : 'null'} | Status: {status}
+                </div>
+
+                {/* Used Input */}
+                {usedInput && !testResults && (
+                    <div className="mb-4 border-b border-zinc-800 pb-2">
+                        <span className="text-zinc-500 text-xs block mb-1">INPUT:</span>
+                        <span className="text-zinc-300">{usedInput}</span>
                     </div>
                 )}
 
