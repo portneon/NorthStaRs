@@ -12,10 +12,10 @@ const QuizCard = ({ quiz }) => {
 
   return (
     <Link href={`/quiz/${quiz.id}`}>
-      <div className="group relative bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-6 hover:bg-white/10 transition-all duration-300 hover:-translate-y-1 cursor-pointer overflow-hidden h-full">
+      <div className="relative bg-white/5 backdrop-blur-sm border border-white/10 p-6 cursor-pointer overflow-hidden h-full">
         {/* Decorative corner */}
         <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-lime-400/50"></div>
-        
+
         <div className="relative z-10 flex flex-col h-full">
           {/* Header with difficulty and daily badge */}
           <div className="flex justify-between items-start mb-4">
@@ -31,7 +31,7 @@ const QuizCard = ({ quiz }) => {
 
           {/* Quiz title and description */}
           <div className="flex-grow">
-            <h3 className="font-sans font-bold text-xl text-white mb-3 group-hover:text-lime-400 transition-colors">
+            <h3 className="font-sans font-bold text-xl text-white mb-3">
               {quiz.title}
             </h3>
             <p className="font-mono text-sm text-zinc-400 mb-6 line-clamp-2">
@@ -52,7 +52,7 @@ const QuizCard = ({ quiz }) => {
                   {quiz.questions?.length || 0} Qs
                 </span>
               </div>
-              <div className="flex items-center text-lime-400 group-hover:translate-x-1 transition-transform">
+              <div className="flex items-center text-lime-400">
                 <ArrowRight size={16} />
               </div>
             </div>
