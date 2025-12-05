@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# NorthStaRs Frontend
 
-## Getting Started
+The frontend for the NorthStaRs platform, built with Next.js 16, React 19, and Tailwind CSS.
 
-First, run the development server:
+## Table of Contents
+- [Setup & Installation](#setup--installation)
+- [Project Structure](#project-structure)
+- [Key Components](#key-components)
+- [State Management](#state-management)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Setup & Installation
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+1.  **Navigate to the frontend directory:**
+    ```bash
+    cd frontend/North
+    ```
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3.  **Run the development server:**
+    ```bash
+    npm run dev
+    ```
+    The application will start on `http://localhost:3000`.
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+The project follows the Next.js App Router structure:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+-   `src/app`: Contains the application routes and pages.
+    -   `page.js`: The main dashboard/home page.
+    -   `auth/`: Login and Signup pages.
+    -   `code-editor/`: The coding environment page.
+    -   `quiz/`: Quiz interface.
+    -   `leaderboard/`: Global rankings page.
+-   `src/components`: Reusable UI components.
+    -   `Hero.jsx`: Main banner component.
+    -   `Stats.jsx`: Statistics display cards.
+    -   `ModuleCard.jsx`: Cards for different learning modules.
+    -   `IntroPage.jsx`: Landing page for unauthenticated users.
+-   `src/utils`: Utility functions and API helpers.
+-   `src/statics`: Static components like `Navbar` and `Footer`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Key Components
 
-## Deploy on Vercel
+### Code Editor (`src/app/code-editor`)
+A full-featured code editor using CodeMirror 6. It supports multiple languages (C++, Java, Python, JavaScript), custom themes, and real-time code execution via the backend API.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Quiz System (`src/app/quiz`)
+An interactive quiz interface that presents questions, handles user selection, and submits attempts to the backend.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Dashboard (`src/app/page.js`)
+The central hub for users, displaying their stats, active modules, daily challenges, and achievements.
+
+## State Management
+
+State is primarily managed using React's built-in hooks (`useState`, `useEffect`) for local component state. Data fetching is handled via asynchronous functions in `src/app/utils/api.js`, which communicate with the backend API.
